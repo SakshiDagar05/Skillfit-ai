@@ -1,2 +1,0 @@
-# Skillfit-ai
-description
