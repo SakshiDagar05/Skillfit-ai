@@ -44,7 +44,7 @@ Natural Interaction → Reliable Assessment → Trustable Verification → Scala
 
 ## Live Demo
 
-**https://YOUR-USERNAME.github.io/skillfit-ai/**
+**https://sakshidagar05.github.io/skillfit-ai/**
 
 ---
 
