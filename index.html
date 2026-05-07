@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillFit AI — Mobile-First Multilingual Video Assessment</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1628;--navy2:#0F1F3D;--blue:#1A56DB;--cyan:#06B6D4;
+  --gold:#F59E0B;--green:#10B981;--pink:#EC4899;--purple:#A78BFA;
+  --card:#0F2D60;--dim:#B0C4DE;--red:#EF4444;--orange:#F97316;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:#fff;min-height:100vh;overflow-x:hidden}
+.screen{display:none;animation:fi 0.35s ease}.screen.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;background:rgba(10,22,40,0.97);border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:300;flex-wrap:wrap;gap:8px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px}.logo span{color:var(--cyan)}
+.nav-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ntab{padding:5px 13px;border-radius:20px;font-size:11px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);transition:all 0.2s}
+.ntab.active{background:rgba(6,182,212,0.15);color:var(--cyan);border:1px solid rgba(6,182,212,0.3)}
+.ntab:hover:not(.active){color:rgba(255,255,255,0.75)}
+.nbadge{font-size:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);color:var(--cyan);padding:3px 10px;border-radius:20px;letter-spacing:1px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;border:none}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#1648c0;transform:translateY(-1px)}
+.btn-out{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15);margin-left:10px}
+.btn-out:hover{border-color:rgba(255,255,255,0.3);color:#fff}
+.bsm{padding:7px 16px;font-size:11px;border-radius:50px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s}
+.bg{background:var(--green);color:#fff}.br{background:var(--red);color:#fff}
+.bgold{background:transparent;color:var(--gold);border:1px solid rgba(245,158,11,0.3)}
+.bcyan{background:var(--cyan);color:#0A1628}
+.bback{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;margin-bottom:22px;background:none;border:none;transition:color 0.2s}
+.bback:hover{color:rgba(255,255,255,0.7)}
+
+/* FORMS */
+.flabel{font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:6px;display:block}
+.finput{width:100%;background:var(--card);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s}
+.finput:focus{border-color:var(--cyan)}.finput::placeholder{color:rgba(255,255,255,0.22)}
+.fgroup{margin-bottom:14px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.divider{display:flex;align-items:center;gap:12px;margin:14px 0;font-size:11px;color:rgba(255,255,255,0.2)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07)}
+.infobox{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6}
+.infobox strong{color:rgba(255,255,255,0.75)}
+
+/* SHARED CARD */
+.panel{background:var(--card);border-radius:14px;padding:18px}
+.plabel{font-size:10px;letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase;margin-bottom:10px}
+
+/* BADGE CHECKS */
+.chrow{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:10px;padding:11px 15px}
+.chbadge{font-size:10px;font-weight:500;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.pass{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
+.warn{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3)}
+.fail{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.flagbadge{background:rgba(249,115,22,0.15);color:var(--orange);border:1px solid rgba(249,115,22,0.3)}
+
+/* LANG PILLS */
+.lpill{padding:6px 14px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.5);transition:all 0.2s}
+.lpill.active{background:rgba(6,182,212,0.12);border-color:var(--cyan);color:var(--cyan)}
+.lrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+
+/* WAVE */
+.waveviz{display:flex;align-items:center;gap:3px;height:34px;padding:0 4px;margin:10px 0}
+.wbar{width:3px;border-radius:2px;background:var(--cyan);animation:wv 1.2s ease infinite}
+@keyframes wv{0%,100%{height:4px;opacity:0.4}50%{height:20px;opacity:1}}
+.livdot{width:9px;height:9px;background:var(--red);border-radius:50%;display:inline-block;animation:blink 1s ease infinite;margin-right:5px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* MODSCREEN */
+.modscreen{max-width:860px;margin:0 auto;padding:32px 28px}
+.stitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.ssub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px}
+
+/* TOAST */
+.toast{position:fixed;top:68px;right:22px;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:500;z-index:9999;animation:fi 0.3s ease;pointer-events:none;color:#fff}
+
+/* ALERT BANNER */
+.alertbar{display:none;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--red);display:flex;align-items:center;gap:10px}
+
+/* ROLE SELECT PAGE */
+.rolepage{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 24px;position:relative;overflow:hidden}
+.rolepage::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:580px;height:580px;background:radial-gradient(circle,rgba(26,86,219,0.13) 0%,transparent 70%);pointer-events:none}
+.rolecards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;width:100%;max-width:660px}
+.rolecard{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:26px 18px;cursor:pointer;transition:all 0.2s;text-align:center;position:relative;overflow:hidden}
+.rolecard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.rolecard:hover{transform:translateY(-3px);background:rgba(255,255,255,0.07)}
+.rci{font-size:28px;margin-bottom:12px}
+.rcn{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
+.rcd{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5}
+.rcb{display:inline-block;margin-top:10px;font-size:10px;padding:4px 12px;border-radius:20px;font-weight:500}
+
+/* CANDIDATE ROLE PICKER (inside login) */
+.crole-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px}
+.crole-card{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 10px;cursor:pointer;text-align:center;transition:all 0.2s}
+.crole-card:hover,.crole-card.selected{border-color:var(--cyan);background:rgba(6,182,212,0.08)}
+.crole-icon{font-size:20px;margin-bottom:6px}
+.crole-name{font-size:12px;font-weight:500}
+.crole-sub{font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px}
+
+/* VIDEO UPLOAD ZONE */
+.upload-zone{border:2px dashed rgba(255,255,255,0.15);border-radius:14px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:14px;position:relative}
+.upload-zone:hover{border-color:var(--cyan);background:rgba(6,182,212,0.04)}
+.upload-zone.has-file{border-color:var(--green);background:rgba(16,185,129,0.05);border-style:solid}
+.upload-zone.recording{border-color:var(--red);background:rgba(239,68,68,0.05);border-style:solid;animation:recpulse 1.5s ease infinite}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.2)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+.upload-tabs{display:flex;gap:10px;margin-bottom:14px}
+.utab{flex:1;padding:9px;border-radius:10px;text-align:center;font-size:12px;cursor:pointer;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.45);transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.utab.active{background:rgba(6,182,212,0.12);border-color:var(--cyan);color:var(--cyan)}
+
+/* INTEGRITY FLAGS */
+.flag-row{display:flex;align-items:flex-start;justify-content:space-between;background:var(--card);border-radius:10px;padding:13px 16px;gap:10px}
+.flag-info h4{font-size:13px;font-weight:500;margin-bottom:3px}
+.flag-info p{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5}
+.flag-time{font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px}
+
+/* DASH SHELL */
+.dashshell{padding:22px}
+.dashnavrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.dashlogotext{font-family:'Syne',sans-serif;font-weight:800;font-size:18px}.dashlogotext span{color:var(--cyan)}
+.duserrow{display:flex;align-items:center;gap:10px}
+.davatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.drtag{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500}
+.lout{font-size:11px;color:rgba(255,255,255,0.35);cursor:pointer;background:none;border:1px solid rgba(255,255,255,0.1);padding:5px 14px;border-radius:20px;transition:all 0.2s}
+.lout:hover{color:#fff;border-color:rgba(255,255,255,0.3)}
+.wbar2{background:var(--card);border-radius:14px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.wbar2 h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:3px}
+.wbar2 p{font-size:12px;color:rgba(255,255,255,0.4)}
+.kpirow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:600px){.kpirow,.frow,.assess-grid,.face-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.kpirow{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--card);border-radius:12px;padding:15px;position:relative;overflow:hidden}
+.kpiv{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;line-height:1;margin-bottom:3px}
+.kpil{font-size:11px;color:rgba(255,255,255,0.38)}
+.qkgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.qkcard{background:var(--card);border-radius:12px;padding:15px;cursor:pointer;transition:all 0.2s;border:1px solid rgba(255,255,255,0.05)}
+.qkcard:hover{background:rgba(15,45,96,0.85);transform:translateY(-1px)}
+
+/* MODULE HOME */
+.hero{text-align:center;padding:48px 28px 36px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(26,86,219,0.13) 0%,transparent 70%);pointer-events:none}
+.hero-tag{display:inline-block;font-size:10px;letter-spacing:2px;color:var(--cyan);background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);padding:5px 16px;border-radius:20px;margin-bottom:20px;text-transform:uppercase}
+.modgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:0 28px 28px;max-width:940px;margin:0 auto}
+.modcard{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;border-top-width:3px}
+.modcard:hover{background:rgba(255,255,255,0.07);transform:translateY(-2px)}
+.mnum{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;color:rgba(255,255,255,0.04);position:absolute;top:8px;right:12px}
+.stats-strip{display:flex;justify-content:center;gap:28px;padding:18px 28px;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);flex-wrap:wrap}
+
+/* ASSESS */
+.assess-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.acard{background:var(--card);border-radius:12px;padding:16px}
+.bartrack{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.barfill{height:100%;border-radius:3px;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
+
+/* FACE GRID */
+.face-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chlist{display:flex;flex-direction:column;gap:9px}
+.awbar{width:4px;border-radius:2px;background:var(--cyan)}
+
+/* CLASSIFICATION */
+.cclass-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.cclass{border-radius:12px;padding:16px}
+.frow2{display:flex;align-items:center;gap:10px}
+.fbar-wrap{flex:1;height:20px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+.fbar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:500;transition:width 1.5s cubic-bezier(0.4,0,0.2,1)}
+
+/* DASHBOARD TABLE */
+.thead{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.2fr 1fr;gap:8px;padding:9px 14px;background:rgba(255,255,255,0.04);font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.3);text-transform:uppercase}
+.trow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.2fr 1fr;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.05);align-items:center;font-size:12px;transition:background 0.15s}
+.trow:hover{background:rgba(255,255,255,0.025)}
+
+/* RECORDING TIMER */
+#recTimerDisplay{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--red);margin:8px 0}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Skill<span>Fit</span> AI</div>
+  <div class="nav-tabs" id="mainNav" style="display:none">
+    <button class="ntab active" onclick="showMod('home')">Overview</button>
+    <button class="ntab" onclick="showMod('interview')">Interview</button>
+    <button class="ntab" onclick="showMod('assessment')">Assessment</button>
+    <button class="ntab" onclick="showMod('validation')">Validation</button>
+    <button class="ntab" onclick="showMod('integrity')">Integrity</button>
+    <button class="ntab" onclick="showMod('classification')">Fitment</button>
+    <button class="ntab" onclick="showMod('dashboard')">Dashboard</button>
+  </div>
+  <div class="nbadge">THEME 5 — AI FOR BHARAT</div>
+</nav>
+
+<!-- ══ ROLE SELECT ══ -->
+<div id="s-role" class="screen active">
+  <div class="rolepage">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:28px;margin-bottom:6px">Skill<span style="color:var(--cyan)">Fit</span> AI</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:40px">AI FOR BHARAT &nbsp;|&nbsp; IIT Bangalore &nbsp;|&nbsp; Theme 5</div>
+    <div style="font-size:11px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:18px">Select your role to continue</div>
+    <div class="rolecards">
+      <div class="rolecard" style="--bc:var(--cyan)" onclick="goLogin('candidate')">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--cyan)"></div>
+        <div class="rci">&#128100;</div>
+        <div class="rcn" style="color:var(--cyan)">Candidate</div>
+        <div class="rcd">Take your AI video interview in Kannada, Hindi or English</div>
+        <div class="rcb" style="background:rgba(6,182,212,0.15);color:var(--cyan);border:1px solid rgba(6,182,212,0.3)">Job Seeker</div>
+      </div>
+      <div class="rolecard" onclick="goLogin('admin')">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)"></div>
+        <div class="rci">&#127970;</div>
+        <div class="rcn" style="color:var(--gold)">Govt. Admin</div>
+        <div class="rcd">Review candidates, filter by district, manage classifications</div>
+        <div class="rcb" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3)">Karnataka Govt.</div>
+      </div>
+      <div class="rolecard" onclick="goLogin('hr')">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div>
+        <div class="rci">&#128101;</div>
+        <div class="rcn" style="color:var(--green)">HR Recruiter</div>
+        <div class="rcd">Shortlist candidates, view fitment scores, schedule interviews</div>
+        <div class="rcb" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)">Recruiter</div>
+      </div>
+    </div>
+    <div style="margin-top:28px;font-size:11px;color:rgba(255,255,255,0.18)">Sakshi Dagar &nbsp;&#183;&nbsp; Veera Tyagi &nbsp;&#183;&nbsp; Abhyudit Sharma</div>
+  </div>
+</div>
+
+<!-- ══ CANDIDATE LOGIN ══ -->
+<div id="s-candidate" class="screen">
+  <div style="min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px">
+    <div style="width:100%;max-width:420px">
+      <button class="bback" onclick="goRole()">&#8592; Back</button>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:16px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);color:var(--cyan)">&#128100; Candidate Portal</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px">Welcome!</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px">Interview in your language. Choose your role below.</div>
+
+      <!-- Candidate Role Picker -->
+      <div style="font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:10px">I am applying for</div>
+      <div class="crole-grid" id="croleGrid">
+        <div class="crole-card selected" onclick="selectCRole(this,'Blue-Collar Worker')">
+          <div class="crole-icon">&#128296;</div>
+          <div class="crole-name">Blue-Collar</div>
+          <div class="crole-sub">Trade / Manual</div>
+        </div>
+        <div class="crole-card" onclick="selectCRole(this,'Semi-Skilled Worker')">
+          <div class="crole-icon">&#128736;</div>
+          <div class="crole-name">Semi-Skilled</div>
+          <div class="crole-sub">Support roles</div>
+        </div>
+        <div class="crole-card" onclick="selectCRole(this,'Polytechnic Graduate')">
+          <div class="crole-icon">&#127979;</div>
+          <div class="crole-name">Polytechnic</div>
+          <div class="crole-sub">Technical diploma</div>
+        </div>
+        <div class="crole-card" onclick="selectCRole(this,'Field / Sales Officer')">
+          <div class="crole-icon">&#128205;</div>
+          <div class="crole-name">Field Officer</div>
+          <div class="crole-sub">On-ground roles</div>
+        </div>
+      </div>
+
+      <!-- Language -->
+      <div style="font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:8px">Interview Language</div>
+      <div class="lrow">
+        <button class="lpill active" onclick="setLP(this)">&#127470;&#127475; ಕನ್ನಡ</button>
+        <button class="lpill" onclick="setLP(this)">&#127470;&#127475; हिंदी</button>
+        <button class="lpill" onclick="setLP(this)">&#127468;&#127463; English</button>
+        <button class="lpill" onclick="setLP(this)">తెలుగు</button>
+        <button class="lpill" onclick="setLP(this)">தமிழ்</button>
+      </div>
+
+      <div class="fgroup">
+        <label class="flabel">Mobile Number</label>
+        <input class="finput" type="tel" id="candMobile" placeholder="+91 98765 43210">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Aadhaar Last 4 Digits</label>
+        <input class="finput" type="text" id="candAadhaar" maxlength="4" placeholder="XXXX">
+      </div>
+      <div class="infobox"><strong>No smartphone?</strong> WhatsApp <strong>+91 80000 00000</strong> to interview via voice call. Works on 2G networks.</div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="loginCandidate()">&#9654; Continue to Interview</button>
+      <div id="candErr" style="display:none;margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red)"></div><div style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;margin-top:12px;font-style:italic">ಸ್ವಾಗತ — ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಿ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN LOGIN ══ -->
+<div id="s-admin" class="screen">
+  <div style="min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px">
+    <div style="width:100%;max-width:400px">
+      <button class="bback" onclick="goRole()">&#8592; Back</button>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:16px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:var(--gold)">&#127970; Government Admin</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px">Admin Login</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px">Karnataka Department of Skill Development</div>
+      <div class="fgroup"><label class="flabel">Official Email</label><input class="finput" type="email" id="adminEmail" placeholder="name@karnataka.gov.in"></div>
+      <div class="fgroup"><label class="flabel">Password</label><input class="finput" type="password" id="adminPass" placeholder="Enter password"></div>
+      <div class="frow" style="margin-bottom:14px">
+        <div><label class="flabel">District</label><select class="finput" style="cursor:pointer"><option>All Districts</option><option>Dharwad</option><option>Belagavi</option><option>Mysuru</option></select></div>
+        <div><label class="flabel">Department</label><select class="finput" style="cursor:pointer"><option>Skill Development</option><option>Labour Dept.</option><option>KSSDC</option></select></div>
+      </div>
+      <button class="btn" style="width:100%;justify-content:center;background:var(--gold);color:#0A1628" onclick="loginAdmin()">&#128274; Secure Login</button>
+      <div id="adminErr" style="display:none;margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red)"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px"><span style="font-size:12px;color:rgba(255,255,255,0.3);cursor:pointer">Forgot password?</span><span style="font-size:12px;color:rgba(255,255,255,0.3);cursor:pointer">&#128241; OTP Login</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HR LOGIN ══ -->
+<div id="s-hr" class="screen">
+  <div style="min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px">
+    <div style="width:100%;max-width:400px">
+      <button class="bback" onclick="goRole()">&#8592; Back</button>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:16px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--green)">&#128101; HR Recruiter Portal</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px">Recruiter Login</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px">Access fitment scores and shortlisting tools</div>
+      <div class="fgroup"><label class="flabel">Work Email</label><input class="finput" type="email" id="hrEmail" placeholder="you@company.com"></div>
+      <div class="fgroup"><label class="flabel">Password</label><input class="finput" type="password" id="hrPass" placeholder="Enter password"></div>
+      <div class="fgroup"><label class="flabel">Company</label><input class="finput" type="text" id="hrCompany" placeholder="Company name"></div>
+      <button class="btn" style="width:100%;justify-content:center;background:var(--green);color:#fff" onclick="loginHR()">Login to Recruiter Portal</button>
+      <div id="hrErr" style="display:none;margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red)"></div>
+      <div class="divider">or</div>
+      <button class="btn btn-out" style="width:100%;justify-content:center;margin-left:0" onclick="loginOTP()">&#128241; Login with OTP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CANDIDATE DASHBOARD ══ -->
+<div id="s-dash-candidate" class="screen">
+  <div class="dashshell">
+    <div class="dashnavrow">
+      <div class="dashlogotext">Skill<span>Fit</span> AI</div>
+      <div class="duserrow">
+        <div class="davatar" style="background:rgba(6,182,212,0.2);color:var(--cyan)">P</div>
+        <div><div style="font-size:13px;font-weight:500">Priya Ramesh</div><div class="drtag" style="background:rgba(6,182,212,0.12);color:var(--cyan)" id="candRoleTag">Blue-Collar Worker</div></div>
+        <button class="lout" onclick="goRole()">Logout</button>
+      </div>
+    </div>
+    <div class="wbar2">
+      <div><h3>ನಮಸ್ಕಾರ, Priya! &#128075;</h3><p>Your interview is ready. Speak in Kannada — we understand your dialect.</p></div>
+      <button class="bsm bcyan" onclick="goJobRole()">&#9654; Start Interview</button>
+    </div>
+    <div class="kpirow">
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--cyan)"></div><div class="kpiv" style="color:var(--cyan)">0</div><div class="kpil">Interviews Done</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)"></div><div class="kpiv" style="color:var(--gold)">5</div><div class="kpil">Questions</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div><div class="kpiv" style="color:var(--green)">ಕನ್ನಡ</div><div class="kpil">Language</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--purple)"></div><div class="kpiv" style="color:var(--purple)">~8m</div><div class="kpil">Est. Duration</div></div>
+    </div>
+    <div class="qkgrid">
+      <div class="qkcard" onclick="goJobRole()"><div style="font-size:18px;margin-bottom:7px">&#127916;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Start Interview</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">AI-led video in Kannada</div></div>
+      <div class="qkcard" onclick="showT('No results yet — complete interview first','var(--green)')"><div style="font-size:18px;margin-bottom:7px">&#128202;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">My Results</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">View fitment score after interview</div></div>
+      <div class="qkcard" onclick="showT('Opening WhatsApp mode','var(--gold)')"><div style="font-size:18px;margin-bottom:7px">&#128241;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">WhatsApp Mode</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Interview on 2G — no app needed</div></div>
+      <div class="qkcard" onclick="showT('Toll-free: 1800-XXX-XXXX','var(--purple)')"><div style="font-size:18px;margin-bottom:7px">&#129304;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Help & Support</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Available in Kannada</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN DASHBOARD ══ -->
+<div id="s-dash-admin" class="screen">
+  <div class="dashshell">
+    <div class="dashnavrow">
+      <div class="dashlogotext">Skill<span>Fit</span> AI</div>
+      <div class="duserrow">
+        <div class="davatar" style="background:rgba(245,158,11,0.2);color:var(--gold)">K</div>
+        <div><div style="font-size:13px;font-weight:500">Kavitha IAS</div><div class="drtag" style="background:rgba(245,158,11,0.12);color:var(--gold)">Govt. Admin</div></div>
+        <button class="lout" onclick="goRole()">Logout</button>
+      </div>
+    </div>
+    <div class="wbar2">
+      <div><h3>Karnataka Skill Dashboard</h3><p>All Districts &nbsp;|&nbsp; Last updated: Today, 10:42 AM</p></div>
+      <button class="bsm" style="background:var(--gold);color:#0A1628" onclick="goFullProto()">&#128202; Full Dashboard</button>
+    </div>
+    <div class="kpirow">
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--cyan)"></div><div class="kpiv" style="color:var(--cyan)">837</div><div class="kpil">Total Candidates</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div><div class="kpiv" style="color:var(--green)">284</div><div class="kpil">Job-Ready</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)"></div><div class="kpiv" style="color:var(--gold)">312</div><div class="kpil">Need Training</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--red)"></div><div class="kpiv" style="color:var(--red)">143</div><div class="kpil">Flagged</div></div>
+    </div>
+    <div class="qkgrid">
+      <div class="qkcard" onclick="goFullProto()"><div style="font-size:18px;margin-bottom:7px">&#128202;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">All Candidates</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Filter by district, language, category</div></div>
+      <div class="qkcard" onclick="showT('143 flagged cases loaded','var(--red)')"><div style="font-size:18px;margin-bottom:7px">&#128270;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Flagged Cases</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Duplicates and fraud cases</div></div>
+      <div class="qkcard" onclick="showT('Training pipeline opened','var(--gold)')"><div style="font-size:18px;margin-bottom:7px">&#127979;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Training Pipeline</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">312 candidates for upskilling</div></div>
+      <div class="qkcard" onclick="showT('District heat map loading...','var(--purple)')"><div style="font-size:18px;margin-bottom:7px">&#127759;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">District Heat Map</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Skill density across Karnataka</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HR DASHBOARD ══ -->
+<div id="s-dash-hr" class="screen">
+  <div class="dashshell">
+    <div class="dashnavrow">
+      <div class="dashlogotext">Skill<span>Fit</span> AI</div>
+      <div class="duserrow">
+        <div class="davatar" style="background:rgba(16,185,129,0.2);color:var(--green)">R</div>
+        <div><div style="font-size:13px;font-weight:500">Ritu Sharma</div><div class="drtag" style="background:rgba(16,185,129,0.12);color:var(--green)">HR Recruiter</div></div>
+        <button class="lout" onclick="goRole()">Logout</button>
+      </div>
+    </div>
+    <div class="wbar2">
+      <div><h3>Hi Ritu! Your shortlist is ready.</h3><p>Infosys BPM &nbsp;|&nbsp; Open: Field Officer, Data Entry, Customer Support</p></div>
+      <button class="bsm bg" onclick="goFullProto()">&#10003; View Shortlist</button>
+    </div>
+    <div class="kpirow">
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--cyan)"></div><div class="kpiv" style="color:var(--cyan)">48</div><div class="kpil">Matched</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div><div class="kpiv" style="color:var(--green)">12</div><div class="kpil">Shortlisted</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)"></div><div class="kpiv" style="color:var(--gold)">82</div><div class="kpil">Avg. Score</div></div>
+      <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--purple)"></div><div class="kpiv" style="color:var(--purple)">3</div><div class="kpil">Open Roles</div></div>
+    </div>
+    <div class="qkgrid">
+      <div class="qkcard" onclick="goFullProto()"><div style="font-size:18px;margin-bottom:7px">&#9989;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Job-Ready Matches</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">48 candidates scored 75+ for your JD</div></div>
+      <div class="qkcard" onclick="goFullProto()"><div style="font-size:18px;margin-bottom:7px">&#128202;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Score Cards</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">6-dimension fitment reports</div></div>
+      <div class="qkcard" onclick="showT('Scheduler opening...','var(--gold)')"><div style="font-size:18px;margin-bottom:7px">&#128197;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Schedule Interviews</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Send invites to shortlisted candidates</div></div>
+      <div class="qkcard" onclick="showT('Analytics loading...','var(--purple)')"><div style="font-size:18px;margin-bottom:7px">&#128640;</div><div style="font-size:13px;font-weight:500;margin-bottom:3px">Hiring Analytics</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Funnel metrics, time-to-hire</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ JOB ROLE SELECTOR ══ -->
+<div id="s-job-role" class="screen">
+  <div style="min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(26,86,219,0.12) 0%,transparent 70%);pointer-events:none"></div>
+    <button class="bback" onclick="showAll('s-dash-candidate')" style="align-self:flex-start;margin-bottom:16px">&#8592; Back</button>
+    <div style="width:100%;max-width:780px">
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:10px">Step 1 of 2</div>
+        <div style="font-family:Syne,sans-serif;font-size:26px;font-weight:800;margin-bottom:8px">Select Your Job Role</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4)">Questions will be customised based on the role you choose</div>
+      </div>
+
+      <!-- Search -->
+      <div style="margin-bottom:20px;position:relative">
+        <input id="roleSearchInput" class="finput" type="text" placeholder="&#128269; Search job role..." oninput="filterJobRoles(this.value)" style="padding-left:40px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">&#128269;</span>
+      </div>
+
+      <!-- Category Tabs -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="catTabs"></div>
+
+      <!-- Role Cards Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;max-height:420px;overflow-y:auto;padding-right:4px" id="jobRoleGrid"></div>
+
+      <!-- Selected role info -->
+      <div id="selectedRoleInfo" style="display:none;margin-top:16px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:11px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Selected Role</div>
+          <div style="font-size:16px;font-weight:600" id="selectedRoleName">-</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px" id="selectedRoleQCount">- questions</div>
+        </div>
+        <button class="btn btn-blue" onclick="startInterview()">&#9654; Start Interview</button>
+      </div>
+
+      <div id="jobRoleErr" style="display:none;margin-top:14px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);text-align:center">&#9888; Please select a job role to continue.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODULE: OVERVIEW ══ -->
+<div id="mod-home" class="screen">
+  <div class="hero">
+    <div class="hero-tag">All 6 Modules — Live Prototype</div>
+    <h1 style="font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:800;line-height:1.1;letter-spacing:-0.5px;margin-bottom:12px">SkillFit AI<br><span style="color:var(--cyan)">Mobile-First.</span> <span style="color:var(--gold)">Multilingual.</span></h1>
+    <p style="font-size:14px;color:rgba(255,255,255,0.45);max-width:480px;margin:0 auto 26px;line-height:1.7">AI-powered video interview platform for large-scale, Kannada-first workforce assessment with authenticity, fitment classification, and government dashboard.</p>
+    <button class="btn btn-blue" onclick="showMod('interview')">&#9654; Start Interview Flow</button>
+    <button class="btn btn-out" onclick="showMod('dashboard')">Admin Dashboard</button>
+  </div>
+  <div class="stats-strip">
+    <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)">6</div><div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px">Modules</div></div>
+    <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)">5</div><div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px">Languages</div></div>
+    <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)">5</div><div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px">Fitment Categories</div></div>
+    <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)">8s</div><div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px">Per Analysis</div></div>
+    <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)">500M+</div><div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px">Target Workforce</div></div>
+  </div>
+  <div class="modgrid">
+    <div class="modcard" onclick="showMod('interview')" style="border-top-color:var(--blue)"><div class="mnum">01</div><div style="font-size:20px;margin-bottom:9px">&#127916;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:5px">AI Video Interview</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">Mobile-first AI agent in Kannada, Hindi, English. Record live or upload video.</div></div>
+    <div class="modcard" onclick="showMod('assessment')" style="border-top-color:var(--cyan)"><div class="mnum">02</div><div style="font-size:20px;margin-bottom:9px">&#129504;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:5px">Response Assessment</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">NLP + speech + vision. 6-dimension explainable score.</div></div>
+    <div class="modcard" onclick="showMod('validation')" style="border-top-color:var(--green)"><div class="mnum">03</div><div style="font-size:20px;margin-bottom:9px">&#128274;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green);margin-bottom:5px">Face & Voice Validation</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">Liveness, audio clarity, continuity, manipulation detection.</div></div>
+    <div class="modcard" onclick="showMod('integrity')" style="border-top-color:var(--orange)"><div class="mnum">04</div><div style="font-size:20px;margin-bottom:9px">&#128270;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--orange);margin-bottom:5px">Integrity Detection</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">Tab switching, AI agent usage, duplicate & fraud detection.</div></div>
+    <div class="modcard" onclick="showMod('classification')" style="border-top-color:var(--purple)"><div class="mnum">05</div><div style="font-size:20px;margin-bottom:9px">&#128202;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:5px">Candidate Fitment</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">5-category classification mapped to workforce sectors.</div></div>
+    <div class="modcard" onclick="showMod('dashboard')" style="border-top-color:var(--pink)"><div class="mnum">06</div><div style="font-size:20px;margin-bottom:9px">&#127774;</div><div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--pink);margin-bottom:5px">Admin Dashboard</div><div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5">Filter by district, language, review flags, shortlist.</div></div>
+  </div>
+</div>
+
+<!-- ══ MODULE 1: INTERVIEW ══ -->
+<div id="mod-interview" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('home')">&#8592; Back</button>
+  <div class="stitle">Module 1 — AI-Led Video Interview</div>
+  <div class="ssub">Record live, upload your own video, or use WhatsApp voice</div>
+
+  <!-- Upload/Record Tabs -->
+  <div class="upload-tabs" style="margin-bottom:16px">
+    <button class="utab active" onclick="setVTab(this,'record')" id="vtab-record">&#128250; Record Live</button>
+    <button class="utab" onclick="setVTab(this,'upload')" id="vtab-upload">&#128193; Upload Video</button>
+    <button class="utab" onclick="setVTab(this,'whatsapp')" id="vtab-whatsapp">&#128241; WhatsApp</button>
+  </div>
+
+  <!-- RECORD PANEL -->
+  <div id="vpanel-record" style="display:block">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div>
+        <div style="background:#000;border-radius:14px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;border:2px solid rgba(6,182,212,0.3);overflow:hidden" id="videoFrame">
+          <div style="font-size:12px;font-weight:500;display:flex;align-items:center;position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.6);padding:4px 10px;border-radius:20px"><span class="livdot" id="livDot"></span><span id="livLabel">LIVE</span></div>
+          <div style="position:absolute;top:12px;right:12px;font-size:11px;background:rgba(0,0,0,0.6);padding:4px 10px;border-radius:20px;color:var(--cyan)" id="timerLabel">00:00</div>
+          <div style="position:absolute;bottom:12px;left:12px;font-size:11px;background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);padding:4px 10px;border-radius:20px;color:var(--green)" id="faceDetect">&#10003; Face Detected</div>
+          <div style="text-align:center" id="camPlaceholder"><div style="font-size:44px;margin-bottom:8px">&#128100;</div><div style="font-size:12px;color:rgba(255,255,255,0.4)">Camera Preview</div></div>
+          <div style="display:none;position:absolute;inset:0;background:rgba(239,68,68,0.08);display:flex;align-items:center;justify-content:center" id="recOverlay"></div>
+        </div>
+        <div class="waveviz" id="waveViz"></div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.55);min-height:56px">
+          <span style="font-size:10px;letter-spacing:1px;color:var(--cyan);text-transform:uppercase">Live Transcript</span><br><br>
+          <span style="color:var(--green);font-weight:500">"ನಾನು ಡೇಟಾ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ ಎರಡು ವರ್ಷ ಕೆಲಸ..."</span><br>
+          <span style="color:rgba(255,255,255,0.35);font-style:italic;font-size:11px">"I have worked in data analysis for two years..."</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel">
+          <div class="plabel">Language</div>
+          <div class="lrow">
+            <button class="lpill active" onclick="setLP(this)">&#127470;&#127475; Kannada</button>
+            <button class="lpill" onclick="setLP(this)">&#127470;&#127475; Hindi</button>
+            <button class="lpill" onclick="setLP(this)">&#127468;&#127463; English</button>
+            <button class="lpill" onclick="setLP(this)">Telugu</button>
+          </div>
+          <!-- Q Nav Pills -->
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px" id="qNavPills"></div>
+          <!-- Q Progress -->
+          <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-bottom:10px"><div id="qProgBar" style="height:100%;background:var(--cyan);border-radius:2px;transition:width 0.4s ease;width:20%"></div></div>
+          <!-- Question Box -->
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+            <div style="font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px" id="qCounter">&#127919; Question 1 of 5</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.9)" id="qEnText"></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-top:5px;font-style:italic" id="qKnText"></div>
+          </div>
+          <!-- Tip -->
+          <div style="background:rgba(26,86,219,0.08);border:1px solid rgba(26,86,219,0.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5" id="qTipBox"></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--green);margin-bottom:2px">Audio</div><div style="font-size:12px;font-weight:600;color:var(--green)">Good</div></div>
+            <div style="flex:1;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--cyan);margin-bottom:2px">Dialect</div><div style="font-size:12px;font-weight:600;color:var(--cyan)">Dharwad</div></div>
+            <div style="flex:1;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--gold);margin-bottom:2px">Network</div><div style="font-size:12px;font-weight:600;color:var(--gold)">2G OK</div></div>
+          </div>
+          <div id="recTimerDisplay" style="display:none;text-align:center;font-family:Syne,sans-serif;font-size:20px;font-weight:700;color:var(--red);margin-bottom:8px">00:00</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="bsm br" id="recBtn" onclick="toggleRec()">&#9679; Start Recording</button>
+            <button class="bsm bgold" onclick="skipIvQ()">Skip</button>
+            <button class="bsm" id="qNextBtn" style="background:var(--cyan);color:#0A1628" onclick="nextIvQ()">Next Q &#8594;</button>
+          </div>
+        </div>
+        <!-- Done Banner -->
+        <div id="ivDoneBanner" style="display:none;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:18px;margin-bottom:6px">&#10003;</div>
+          <div style="font-size:14px;font-weight:600;color:var(--green);margin-bottom:4px">All 5 questions answered!</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:12px">Analyzing your responses now...</div>
+          <button class="bsm bg" onclick="showMod('assessment')">View My Results &#8594;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD PANEL -->
+  <div id="vpanel-upload" style="display:none;max-width:500px">
+    <div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.55)">
+      &#128196; Upload your own recorded video response. Accepted formats: MP4, MOV, WebM — max 5 minutes.
+    </div>
+    <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
+      <div style="font-size:34px;margin-bottom:12px" id="uploadIcon">&#127916;</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:5px" id="uploadTitle">Click to upload your interview video</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.32)" id="uploadSub">MP4 / MOV / WebM &nbsp;&#183;&nbsp; Max 5 minutes</div>
+      <input type="file" id="vidFileInput" accept="video/*" style="display:none" onchange="handleVidFile(this)">
+    </div>
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">&#127919; Question for this upload</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.9)">Describe your previous work experience and key responsibilities.</div>
+    </div>
+    <button class="bsm bg" id="uploadAnalyzeBtn" disabled onclick="showMod('assessment')" style="opacity:0.4;width:100%;padding:12px;font-size:13px">&#9889; Analyze Uploaded Video</button>
+  </div>
+
+  <!-- WHATSAPP PANEL -->
+  <div id="vpanel-whatsapp" style="display:none;max-width:480px">
+    <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:14px;padding:22px;text-align:center;margin-bottom:14px">
+      <div style="font-size:36px;margin-bottom:10px">&#128241;</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px;color:var(--green)">WhatsApp Interview</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;line-height:1.6">Send "HELLO" to start your voice interview.<br>Works on 2G/3G. No app needed.</div>
+      <div style="background:var(--card);border-radius:10px;padding:14px;font-size:22px;font-weight:700;letter-spacing:2px;color:var(--green);margin-bottom:14px">+91 80000 00000</div>
+      <button class="bsm bg" onclick="showT('WhatsApp link copied!','var(--green)')">&#128203; Copy Number</button>
+    </div>
+    <div class="infobox">Available in Kannada, Hindi, Telugu, Tamil, and English. AI agent will call you back within 2 minutes of sending HELLO.</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODULE 2: ASSESSMENT ══ -->
+<div id="mod-assessment" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('interview')">&#8592; Back</button>
+  <div class="stitle">Module 2 — Response Assessment</div>
+  <div class="ssub">Multimodal AI scoring — NLP, speech analysis, and computer vision</div>
+  <div style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+    <div style="text-align:center;padding:22px;background:var(--card);border-radius:14px;flex:0 0 170px;min-width:140px">
+      <div style="font-family:'Syne',sans-serif;font-size:50px;font-weight:800;line-height:1;color:var(--green)" id="scoreCount">0</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.38);margin-top:4px">Overall Score</div>
+      <div style="margin-top:10px;font-size:11px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:var(--green);padding:5px 14px;border-radius:20px;display:inline-block">Workforce-Ready</div>
+    </div>
+    <div style="flex:1;min-width:200px;background:var(--card);border-radius:14px;padding:16px">
+      <div class="plabel">NLP-Annotated Transcript</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.48);line-height:1.8;font-style:italic">
+        "...ನಾನು <span style="color:var(--green);font-style:normal;font-weight:500">ಎರಡು ವರ್ಷ ಕೆಲಸ ಮಾಡಿದ್ದೇನೆ</span> ಮತ್ತು <span style="color:var(--green);font-style:normal;font-weight:500">ಟೀಮ್ ನಿರ್ವಹಣೆ</span>..."<br>
+        <span style="color:rgba(255,255,255,0.28);font-size:11px">"I worked two years and managed team operations..."</span><br><br>
+        <span style="color:rgba(255,255,255,0.2);font-size:10px">Dharwad dialect &nbsp;|&nbsp; Confidence: 93%</span>
+      </div>
+    </div>
+  </div>
+  <div class="assess-grid" id="assessGrid"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="bsm bg" onclick="showMod('validation')">Continue &#8594;</button>
+    <button class="bsm bgold" onclick="showT('Report exported','var(--gold)')">Export Report</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODULE 3: VALIDATION ══ -->
+<div id="mod-validation" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('assessment')">&#8592; Back</button>
+  <div class="stitle">Module 3 — Face & Voice Validation</div>
+  <div class="ssub">Liveness, audio quality, and continuity verification</div>
+  <div class="face-grid">
+    <div>
+      <div class="plabel" style="margin-bottom:10px">Face Validation</div>
+      <div class="chlist">
+        <div class="chrow"><span style="font-size:12px">Face Detected & Centered</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Liveness Confirmed</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Single Person in Frame</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Eye Contact Level</span><span class="chbadge warn">74% — OK</span></div>
+        <div class="chrow"><span style="font-size:12px">Adequate Lighting</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">No Screen-in-Screen</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Face Consistent Across Qs</span><span class="chbadge pass">PASS</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="plabel" style="margin-bottom:10px">Audio Validation</div>
+      <div class="chlist">
+        <div class="chrow"><span style="font-size:12px">Audio Clarity Score</span><span class="chbadge pass">88/100</span></div>
+        <div class="chrow"><span style="font-size:12px">Continuous Speech</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Background Noise</span><span class="chbadge warn">Moderate</span></div>
+        <div class="chrow"><span style="font-size:12px">No Scripted Reading</span><span class="chbadge pass">PASS</span></div>
+        <div class="chrow"><span style="font-size:12px">Response Duration</span><span class="chbadge pass">2m 14s</span></div>
+        <div class="chrow"><span style="font-size:12px">Language: Kannada</span><span class="chbadge pass">93% Conf.</span></div>
+        <div class="chrow"><span style="font-size:12px">Audio Manipulation</span><span class="chbadge pass">NOT DETECTED</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:2px;height:46px;background:var(--card);border-radius:10px;padding:8px 12px;margin-top:12px" id="audioWave"></div>
+    </div>
+  </div>
+  <div style="margin-top:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:18px">&#10003;</span>
+    <div><div style="font-size:13px;font-weight:500;color:var(--green)">Validation Passed — Interview Authentic</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-top:2px">Geo-tagged: Dharwad, Karnataka — 10:42 AM IST</div></div>
+  </div>
+  <div style="margin-top:13px"><button class="bsm bg" onclick="showMod('integrity')">Continue to Integrity &#8594;</button></div>
+</div>
+</div>
+
+<!-- ══ MODULE 4: INTEGRITY ══ -->
+<div id="mod-integrity" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('validation')">&#8592; Back</button>
+  <div class="stitle">Module 4 — Integrity & Duplicate Detection</div>
+  <div class="ssub">Tab switching, AI agent detection, impersonation, and duplicate checks</div>
+
+  <!-- Summary banner -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--red)">3</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">Integrity Flags</div>
+    </div>
+    <div style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--orange)">2</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">Tab Switches</div>
+    </div>
+    <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--purple)">1</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">AI Agent Alert</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--green)">&#10003;</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">No Duplicate</div>
+    </div>
+  </div>
+
+  <!-- TAB SWITCHING -->
+  <div style="margin-bottom:14px">
+    <div style="font-size:11px;letter-spacing:1.5px;color:var(--orange);text-transform:uppercase;margin-bottom:10px">&#128196; Tab Switching Detection</div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="flag-row" style="border-left:3px solid var(--orange)">
+        <div style="font-size:16px;flex-shrink:0">&#9888;</div>
+        <div class="flag-info">
+          <h4>Tab Switch Detected</h4>
+          <p>Candidate navigated away from interview window. Possible search for answers or using external help.</p>
+          <div class="flag-time">&#128336; At 01:23 into interview &nbsp;|&nbsp; Duration away: 18 seconds</div>
+        </div>
+        <span class="chbadge flagbadge">FLAGGED</span>
+      </div>
+      <div class="flag-row" style="border-left:3px solid var(--orange)">
+        <div style="font-size:16px;flex-shrink:0">&#9888;</div>
+        <div class="flag-info">
+          <h4>Tab Switch Detected</h4>
+          <p>Second tab switch during Question 4. Browser focus lost for 9 seconds.</p>
+          <div class="flag-time">&#128336; At 03:47 into interview &nbsp;|&nbsp; Duration away: 9 seconds</div>
+        </div>
+        <span class="chbadge flagbadge">FLAGGED</span>
+      </div>
+      <div class="flag-row" style="border-left:3px solid var(--green)">
+        <div style="font-size:16px;flex-shrink:0">&#10003;</div>
+        <div class="flag-info">
+          <h4>Browser Focus: Stable</h4>
+          <p>Questions 1, 2, 3 completed without any tab switching or focus loss.</p>
+          <div class="flag-time">&#128336; 0–01:22 and 01:41–03:46</div>
+        </div>
+        <span class="chbadge pass">CLEAN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI AGENT DETECTION -->
+  <div style="margin-bottom:14px">
+    <div style="font-size:11px;letter-spacing:1.5px;color:var(--purple);text-transform:uppercase;margin-bottom:10px">&#129504; AI Agent / Assistance Detection</div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="flag-row" style="border-left:3px solid var(--purple)">
+        <div style="font-size:16px;flex-shrink:0">&#129504;</div>
+        <div class="flag-info">
+          <h4>Possible AI-Generated Response Detected</h4>
+          <p>NLP pattern analysis flagged unusually structured language in Question 3 response — formal sentence patterns inconsistent with conversational Kannada. Possible ChatGPT or AI assistant usage.</p>
+          <div class="flag-time">&#128336; Question 3 &nbsp;|&nbsp; AI-score: 74% likelihood &nbsp;|&nbsp; Requires manual review</div>
+        </div>
+        <span class="chbadge" style="background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3)">REVIEW</span>
+      </div>
+      <div class="flag-row" style="border-left:3px solid var(--green)">
+        <div style="font-size:16px;flex-shrink:0">&#10003;</div>
+        <div class="flag-info">
+          <h4>Questions 1, 2, 4, 5 — Natural Speech Detected</h4>
+          <p>Responses show natural dialect variation, filler words, and spontaneous speech patterns consistent with genuine Kannada speaker.</p>
+          <div class="flag-time">&#128336; Dialect: Dharwad &nbsp;|&nbsp; Spontaneity score: 91%</div>
+        </div>
+        <span class="chbadge pass">NATURAL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DUPLICATE CHECK -->
+  <div style="margin-bottom:14px">
+    <div style="font-size:11px;letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase;margin-bottom:10px">&#128100; Duplicate & Identity Check</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:var(--card);border-radius:12px;padding:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:42px;height:42px;border-radius:50%;background:rgba(6,182,212,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--cyan)">P</div>
+          <div><div style="font-size:13px;font-weight:500">Priya Ramesh</div><div style="font-size:11px;color:rgba(255,255,255,0.35)">Dharwad, Karnataka</div></div>
+        </div>
+        <div class="chlist">
+          <div class="chrow"><span style="font-size:11px">Aadhaar Verified</span><span class="chbadge pass">VERIFIED</span></div>
+          <div class="chrow"><span style="font-size:11px">Face Embedding</span><span class="chbadge pass">UNIQUE</span></div>
+          <div class="chrow"><span style="font-size:11px">Previous Attempts</span><span class="chbadge pass">0 Found</span></div>
+        </div>
+      </div>
+      <div style="background:var(--card);border-radius:12px;padding:16px">
+        <div style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:10px">Other Flagged Candidates</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(239,68,68,0.08);border-radius:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--red)">R</div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:500">Ravi K.</div><div style="font-size:10px;color:rgba(255,255,255,0.35)">3 attempts — 97% face match</div></div>
+            <button class="bsm" style="background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);font-size:10px;padding:4px 10px;cursor:pointer;border-radius:6px" onclick="showT('Flagged as duplicate','var(--red)')">Flag</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(245,158,11,0.08);border-radius:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold)">S</div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:500">Sunita M.</div><div style="font-size:10px;color:rgba(255,255,255,0.35)">Inconsistent face detected</div></div>
+            <button class="bsm" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);font-size:10px;padding:4px 10px;cursor:pointer;border-radius:6px" onclick="showT('Sent for review','var(--gold)')">Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERALL VERDICT -->
+  <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px">
+    <span style="font-size:18px">&#9888;</span>
+    <div><div style="font-size:13px;font-weight:500;color:var(--orange)">Integrity Score: Moderate — Manual Review Recommended</div><div style="font-size:11px;color:rgba(255,255,255,0.38);margin-top:2px">2 tab switches + 1 AI-pattern alert detected. Identity verified. Human review advised before final classification.</div></div>
+  </div>
+  <button class="bsm bg" onclick="showMod('classification')">Continue to Fitment &#8594;</button>
+</div>
+</div>
+
+<!-- ══ MODULE 5: CLASSIFICATION ══ -->
+<div id="mod-classification" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('integrity')">&#8592; Back</button>
+  <div class="stitle">Module 5 — Candidate Fitment & Classification</div>
+  <div class="ssub">5-category classification mapped to workforce sectors</div>
+  <div class="cclass-grid">
+    <div class="cclass" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2)"><div class="class-title" style="color:var(--green);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px">Job-Ready</div><div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--green)">284</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Blue-collar, field, technical ops</div></div>
+    <div class="cclass" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2)"><div style="color:var(--gold);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px">Requires Training</div><div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--gold)">312</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Polytechnic, semi-skilled workforce</div></div>
+    <div class="cclass" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2)"><div style="color:var(--purple);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px">Manual Verification</div><div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--purple)">98</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Edge cases, integrity flags</div></div>
+    <div class="cclass" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2)"><div style="color:var(--red);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px">Suspected Fraud</div><div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--red)">143</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Duplicates, AI-assist, impersonation</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:14px">
+    <div class="plabel">Sector Mapping Funnel</div>
+    <div id="funnelEl" style="display:flex;flex-direction:column;gap:8px;margin-top:10px"></div>
+  </div>
+  <button class="bsm bg" onclick="showMod('dashboard')">View Dashboard &#8594;</button>
+</div>
+</div>
+
+<!-- ══ MODULE 6: DASHBOARD ══ -->
+<div id="mod-dashboard" class="screen">
+<div class="modscreen">
+  <button class="bback" onclick="showMod('home')">&#8592; Back</button>
+  <div class="stitle">Module 6 — Government Admin Dashboard</div>
+  <div class="ssub">Filter, review, shortlist, and act on candidates</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+    <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--cyan)"></div><div class="kpiv" style="color:var(--cyan)">837</div><div class="kpil">Total Candidates</div></div>
+    <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div><div class="kpiv" style="color:var(--green)">284</div><div class="kpil">Job-Ready</div></div>
+    <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)"></div><div class="kpiv" style="color:var(--gold)">143</div><div class="kpil">Flagged</div></div>
+    <div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--purple)"></div><div class="kpiv" style="color:var(--purple)">98</div><div class="kpil">Review</div></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <select class="finput" style="width:auto;padding:7px 14px;cursor:pointer" onchange="filterTable(this.value,'district')"><option>All Districts</option><option>Dharwad</option><option>Belagavi</option><option>Mysuru</option><option>Bengaluru Rural</option></select>
+    <select class="finput" style="width:auto;padding:7px 14px;cursor:pointer" onchange="filterTable(this.value,'lang')"><option>All Languages</option><option>Kannada</option><option>Hindi</option><option>English</option></select>
+    <select class="finput" style="width:auto;padding:7px 14px;cursor:pointer" onchange="filterTable(this.value,'cat')"><option>All Categories</option><option>Job-Ready</option><option>Training</option><option>Flagged</option><option>Review</option></select>
+    <select class="finput" style="width:auto;padding:7px 14px;cursor:pointer"><option>All Sectors</option><option>Blue-Collar</option><option>Polytechnic</option><option>Semi-Skilled</option></select>
+  </div>
+  <div style="background:var(--card);border-radius:12px;overflow:hidden">
+    <div class="thead"><span>Candidate</span><span>District</span><span>Language</span><span>Score</span><span>Category</span><span>Actions</span></div>
+    <div id="tableBody"></div>
+  </div>
+</div>
+</div>
+
+<div id="pageFooter" style="display:none;text-align:center;padding:24px;font-size:11px;color:rgba(255,255,255,0.16);border-top:1px solid rgba(255,255,255,0.05);margin-top:28px">SkillFit AI &nbsp;&#183;&nbsp; AI FOR BHARAT &nbsp;&#183;&nbsp; IIT Bangalore &nbsp;&#183;&nbsp; Theme 5 &nbsp;&#183;&nbsp; Sakshi Dagar &nbsp;&#183;&nbsp; Veera Tyagi &nbsp;&#183;&nbsp; Abhyudit Sharma</div>
+
+<script>
+var candidates=[
+  {name:"Priya R.",loc:"Dharwad",lang:"Kannada",score:82,cat:"Job-Ready",cc:"var(--green)"},
+  {name:"Ravi K.",loc:"Belagavi",lang:"Kannada",score:21,cat:"Flagged",cc:"var(--red)"},
+  {name:"Meena S.",loc:"Mysuru",lang:"Hindi",score:68,cat:"Training",cc:"var(--gold)"},
+  {name:"Sunita M.",loc:"Dharwad",lang:"Kannada",score:44,cat:"Review",cc:"var(--purple)"},
+  {name:"Arjun T.",loc:"Bengaluru Rural",lang:"English",score:58,cat:"Training",cc:"var(--gold)"},
+  {name:"Kavitha B.",loc:"Belagavi",lang:"Kannada",score:87,cat:"Job-Ready",cc:"var(--green)"},
+  {name:"Mohan L.",loc:"Mysuru",lang:"Hindi",score:76,cat:"Job-Ready",cc:"var(--green)"},
+  {name:"Deepa N.",loc:"Dharwad",lang:"Kannada",score:33,cat:"Flagged",cc:"var(--red)"},
+];
+var dims=[
+  {name:'Content Relevance',score:88,color:'var(--cyan)',note:'Strong domain vocabulary, answered all parts.'},
+  {name:'Vocal Confidence',score:79,color:'var(--blue)',note:'Steady pace, 2 filler words/min.'},
+  {name:'Language Fluency',score:85,color:'var(--green)',note:'Clear Kannada, 93% translation confidence.'},
+  {name:'Eye Contact',score:74,color:'var(--gold)',note:'68% camera-facing. Slight drift noted.'},
+  {name:'Soft Skills',score:80,color:'var(--purple)',note:'Ownership, team orientation, calm delivery.'},
+  {name:'Role Alignment',score:91,color:'var(--pink)',note:'Strong match for semi-skilled profile.'},
+];
+var funnel=[
+  {label:'Blue-Collar Trades',pct:42,color:'var(--blue)',count:352},
+  {label:'Polytechnic Skilled',pct:28,color:'var(--cyan)',count:234},
+  {label:'Semi-Skilled',pct:18,color:'var(--green)',count:151},
+  {label:'Specialist Track',pct:12,color:'var(--purple)',count:100},
+];
+
+
+// ══════════════════════════════════════════════
+// JOB ROLES & DYNAMIC QUESTIONS
+// ══════════════════════════════════════════════
+var selectedJobRole = null;
+
+var jobRoles = [
+  // Technology
+  {id:'software_dev', name:'Software Developer', icon:'&#128187;', cat:'Technology', color:'var(--blue)', qs:[
+    {en:"Tell us about yourself and your programming background.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ನಿಮ್ಮ ಪ್ರೋಗ್ರಾಮಿಂಗ್ ಅನುಭವದ ಬಗ್ಗೆ ಹೇಳಿ.",tip:"Mention languages you know, years of experience, and types of projects."},
+    {en:"What programming languages and frameworks do you work with?",kn:"ನೀವು ಯಾವ ಪ್ರೋಗ್ರಾಮಿಂಗ್ ಭಾಷೆಗಳು ಮತ್ತು ಫ್ರೇಮ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬಳಸುತ್ತೀರಿ?",tip:"Be specific — mention React, Node, Python, Java etc. and your proficiency level."},
+    {en:"Describe a challenging project you built. What was your role?",kn:"ನೀವು ನಿರ್ಮಿಸಿದ ಸವಾಲಿನ ಪ್ರಾಜೆಕ್ಟ್ ಬಗ್ಗೆ ವಿವರಿಸಿ. ನಿಮ್ಮ ಪಾತ್ರ ಏನಿತ್ತು?",tip:"Use the STAR format — Situation, Task, Action, Result."},
+    {en:"How do you approach debugging a complex bug in production?",kn:"ಪ್ರೊಡಕ್ಷನ್‌ನಲ್ಲಿ ಸಂಕೀರ್ಣ ಬಗ್ ಅನ್ನು ನೀವು ಹೇಗೆ ಡೀಬಗ್ ಮಾಡುತ್ತೀರಿ?",tip:"Explain your systematic approach — logging, isolating, testing."},
+    {en:"Tell us about your experience with version control and team collaboration.",kn:"ವರ್ಷನ್ ಕಂಟ್ರೋಲ್ ಮತ್ತು ತಂಡ ಸಹಯೋಗದ ಬಗ್ಗೆ ನಿಮ್ಮ ಅನುಭವ ಹೇಳಿ.",tip:"Mention Git, pull requests, code reviews, Agile/Scrum experience."},
+    {en:"Where do you see yourself growing technically in the next 2 years?",kn:"ಮುಂದಿನ 2 ವರ್ಷಗಳಲ್ಲಿ ನೀವು ತಾಂತ್ರಿಕವಾಗಿ ಎಲ್ಲಿ ಬೆಳೆಯಲು ಬಯಸುತ್ತೀರಿ?",tip:"Show ambition — cloud, AI/ML, architecture, leadership."}
+  ]},
+  {id:'data_analyst', name:'Data Analyst', icon:'&#128202;', cat:'Technology', color:'var(--cyan)', qs:[
+    {en:"Tell us about yourself and your experience with data analysis.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಡೇಟಾ ವಿಶ್ಲೇಷಣೆಯ ಅನುಭವ ಹೇಳಿ.",tip:"Mention tools like Excel, SQL, Python, Tableau, Power BI."},
+    {en:"What tools and technologies do you use for data analysis?",kn:"ಡೇಟಾ ವಿಶ್ಲೇಷಣೆಗಾಗಿ ನೀವು ಯಾವ ಪರಿಕರಗಳನ್ನು ಬಳಸುತ್ತೀರಿ?",tip:"Be specific about your proficiency — beginner, intermediate, expert."},
+    {en:"Describe a time you turned data into a business insight. What happened?",kn:"ನೀವು ಡೇಟಾವನ್ನು ವ್ಯವಹಾರ ಒಳನೋಟವಾಗಿ ಪರಿವರ್ತಿಸಿದ ಸಮಯ ವಿವರಿಸಿ.",tip:"Give a real example — what data, what insight, what decision was made."},
+    {en:"How do you handle missing or incorrect data in a dataset?",kn:"ಡೇಟಾಸೆಟ್‌ನಲ್ಲಿ ತಪ್ಪಿದ ಅಥವಾ ತಪ್ಪಾದ ಡೇಟಾವನ್ನು ನೀವು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Mention imputation, flagging, removing outliers, data cleaning strategies."},
+    {en:"How do you communicate data findings to a non-technical audience?",kn:"ತಾಂತ್ರಿಕವಲ್ಲದ ಪ್ರೇಕ್ಷಕರಿಗೆ ಡೇಟಾ ಸಂಶೋಧನೆಗಳನ್ನು ನೀವು ಹೇಗೆ ತಿಳಿಸುತ್ತೀರಿ?",tip:"Talk about visualizations, simple language, storytelling with data."}
+  ]},
+  {id:'ml_engineer', name:'ML Engineer', icon:'&#129504;', cat:'Technology', color:'var(--purple)', qs:[
+    {en:"Tell us about yourself and your machine learning background.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಮಷಿನ್ ಲರ್ನಿಂಗ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention frameworks — TensorFlow, PyTorch, Scikit-learn, Keras."},
+    {en:"Explain a machine learning model you built from scratch.",kn:"ನೀವು ಸ್ಕ್ರ್ಯಾಚ್‌ನಿಂದ ನಿರ್ಮಿಸಿದ ML ಮಾಡೆಲ್ ವಿವರಿಸಿ.",tip:"Cover problem statement, data, model choice, training, evaluation."},
+    {en:"How do you handle overfitting in a model?",kn:"ಮಾಡೆಲ್‌ನಲ್ಲಿ ಓವರ್‌ಫಿಟ್ಟಿಂಗ್ ಅನ್ನು ನೀವು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Mention regularization, dropout, cross-validation, early stopping."},
+    {en:"What is your experience with deploying ML models to production?",kn:"ML ಮಾಡೆಲ್‌ಗಳನ್ನು ಪ್ರೊಡಕ್ಷನ್‌ಗೆ ಡಿಪ್ಲಾಯ್ ಮಾಡುವ ಅನುಭವ ಹೇಳಿ.",tip:"Mention APIs, Docker, MLflow, monitoring model drift."},
+    {en:"How do you evaluate model performance beyond accuracy?",kn:"ನಿಖರತೆಯ ಆಚೆ ಮಾಡೆಲ್ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ನೀವು ಹೇಗೆ ಮೌಲ್ಯಮಾಪನ ಮಾಡುತ್ತೀರಿ?",tip:"Talk about precision, recall, F1, AUC-ROC, confusion matrix."},
+    {en:"Where do you want to specialize — NLP, computer vision, or something else?",kn:"ನೀವು NLP, ಕಂಪ್ಯೂಟರ್ ವಿಷನ್, ಅಥವಾ ಬೇರೆ ಯಾವುದರಲ್ಲಿ ವಿಶೇಷ ತಜ್ಞತೆ ಪಡೆಯಲು ಬಯಸುತ್ತೀರಿ?",tip:"Show a clear direction with examples of your interest."}
+  ]},
+  {id:'frontend_dev', name:'Frontend Developer', icon:'&#127760;', cat:'Technology', color:'var(--green)', qs:[
+    {en:"Tell us about yourself and your frontend development experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಫ್ರಂಟ್‌ಎಂಡ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention HTML, CSS, JavaScript, React, Vue, Angular."},
+    {en:"Walk us through a UI you are proud of building.",kn:"ನೀವು ನಿರ್ಮಿಸಿದ UI ಯ ಬಗ್ಗೆ ವಿವರಿಸಿ.",tip:"Talk about design choices, responsiveness, accessibility, performance."},
+    {en:"How do you ensure your web apps are responsive across devices?",kn:"ನಿಮ್ಮ ವೆಬ್ ಅಪ್ಲಿಕೇಶನ್ ಎಲ್ಲ ಸಾಧನಗಳಲ್ಲಿ ರೆಸ್ಪಾನ್ಸಿವ್ ಆಗಿರಲು ನೀವು ಏನು ಮಾಡುತ್ತೀರಿ?",tip:"Mention media queries, flexbox, grid, mobile-first design."},
+    {en:"How do you optimize web performance and page load speed?",kn:"ವೆಬ್ ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಲೋಡ್ ವೇಗವನ್ನು ಹೇಗೆ ಉತ್ತಮಗೊಳಿಸುತ್ತೀರಿ?",tip:"Lazy loading, code splitting, image optimization, CDN, caching."},
+    {en:"Describe your experience with REST APIs and state management.",kn:"REST API ಮತ್ತು ಸ್ಟೇಟ್ ಮ್ಯಾನೇಜ್‌ಮೆಂಟ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention Redux, Context API, Axios, fetch, error handling."}
+  ]},
+  {id:'backend_dev', name:'Backend Developer', icon:'&#128421;', cat:'Technology', color:'var(--blue)', qs:[
+    {en:"Tell us about yourself and your backend development background.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಬ್ಯಾಕ್‌ಎಂಡ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention languages, frameworks, databases you work with."},
+    {en:"How do you design a scalable REST API?",kn:"ಸ್ಕೇಲಬಲ್ REST API ಅನ್ನು ನೀವು ಹೇಗೆ ಡಿಸೈನ್ ಮಾಡುತ್ತೀರಿ?",tip:"Talk about endpoints, authentication, rate limiting, versioning."},
+    {en:"Describe your experience with databases — SQL and NoSQL.",kn:"SQL ಮತ್ತು NoSQL ಡೇಟಾಬೇಸ್‌ಗಳ ಅನುಭವ ಹೇಳಿ.",tip:"Mention PostgreSQL, MySQL, MongoDB, Redis and when you use each."},
+    {en:"How do you handle security in a backend application?",kn:"ಬ್ಯಾಕ್‌ಎಂಡ್ ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಸುರಕ್ಷತೆ ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"JWT, OAuth, input sanitization, SQL injection prevention, HTTPS."},
+    {en:"Tell us about your experience with cloud platforms or DevOps.",kn:"ಕ್ಲೌಡ್ ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಅಥವಾ DevOps ಅನುಭವ ಹೇಳಿ.",tip:"AWS, GCP, Azure, Docker, Kubernetes, CI/CD pipelines."}
+  ]},
+  {id:'devops', name:'DevOps Engineer', icon:'&#9881;', cat:'Technology', color:'var(--orange)', qs:[
+    {en:"Tell us about yourself and your DevOps experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು DevOps ಅನುಭವ ಹೇಳಿ.",tip:"Mention tools — Docker, Kubernetes, Jenkins, Terraform, Ansible."},
+    {en:"Describe your experience with CI/CD pipelines.",kn:"CI/CD ಪೈಪ್‌ಲೈನ್‌ಗಳ ಅನುಭವ ವಿವರಿಸಿ.",tip:"Talk about GitHub Actions, Jenkins, GitLab CI, deployment automation."},
+    {en:"How do you monitor and maintain production systems?",kn:"ಪ್ರೊಡಕ್ಷನ್ ಸಿಸ್ಟಮ್‌ಗಳನ್ನು ನೀವು ಹೇಗೆ ಮಾನಿಟರ್ ಮಾಡುತ್ತೀರಿ?",tip:"Prometheus, Grafana, ELK stack, PagerDuty, uptime monitoring."},
+    {en:"Tell us about a production incident you handled. How did you resolve it?",kn:"ನೀವು ನಿರ್ವಹಿಸಿದ ಪ್ರೊಡಕ್ಷನ್ ಘಟನೆ ಬಗ್ಗೆ ಹೇಳಿ.",tip:"Describe the issue, impact, steps taken, resolution, and prevention."},
+    {en:"Describe your experience with containerization and orchestration.",kn:"ಕಂಟೈನರೈಸೇಶನ್ ಮತ್ತು ಆರ್ಕೆಸ್ಟ್ರೇಶನ್ ಅನುಭವ ಹೇಳಿ.",tip:"Docker, Kubernetes, Helm charts, microservices architecture."}
+  ]},
+  // Management
+  {id:'product_manager', name:'Product Manager', icon:'&#128196;', cat:'Management', color:'var(--gold)', qs:[
+    {en:"Tell us about yourself and your product management experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಪ್ರಾಡಕ್ಟ್ ಮ್ಯಾನೇಜ್‌ಮೆಂಟ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention products you have managed, team sizes, industries."},
+    {en:"How do you prioritize features when you have limited resources?",kn:"ಸೀಮಿತ ಸಂಪನ್ಮೂಲಗಳಿದ್ದಾಗ ಫೀಚರ್‌ಗಳಿಗೆ ನೀವು ಹೇಗೆ ಆದ್ಯತೆ ನೀಡುತ್ತೀರಿ?",tip:"RICE scoring, MoSCoW, customer feedback, business value."},
+    {en:"Describe a product you launched. What was the impact?",kn:"ನೀವು ಲಾಂಚ್ ಮಾಡಿದ ಪ್ರಾಡಕ್ಟ್ ವಿವರಿಸಿ. ಪ್ರಭಾವ ಏನಿತ್ತು?",tip:"Talk about metrics — DAU, retention, revenue, user satisfaction."},
+    {en:"How do you gather and use customer feedback to improve a product?",kn:"ಗ್ರಾಹಕ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಹೇಗೆ ಸಂಗ್ರಹಿಸಿ ಉತ್ಪನ್ನ ಸುಧಾರಿಸುತ್ತೀರಿ?",tip:"User interviews, surveys, NPS, analytics, A/B testing."},
+    {en:"How do you work with engineering and design teams?",kn:"ಎಂಜಿನಿಯರಿಂಗ್ ಮತ್ತು ಡಿಸೈನ್ ತಂಡಗಳೊಂದಿಗೆ ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತೀರಿ?",tip:"Agile, sprint planning, PRDs, design reviews, alignment meetings."},
+    {en:"Tell us about a product failure. What did you learn from it?",kn:"ಒಂದು ಉತ್ಪನ್ನ ವೈಫಲ್ಯದ ಬಗ್ಗೆ ಹೇಳಿ. ನೀವು ಏನು ಕಲಿತಿರಿ?",tip:"Honesty matters. Show self-awareness, learnings, and how you improved."}
+  ]},
+  {id:'project_manager', name:'Project Manager', icon:'&#128203;', cat:'Management', color:'var(--green)', qs:[
+    {en:"Tell us about yourself and your project management experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜ್‌ಮೆಂಟ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention methodologies — Agile, Scrum, PMP, PRINCE2."},
+    {en:"How do you manage project scope and prevent scope creep?",kn:"ಪ್ರಾಜೆಕ್ಟ್ ಸ್ಕೋಪ್ ಹೇಗೆ ನಿರ್ವಹಿಸಿ ಸ್ಕೋಪ್ ಕ್ರೀಪ್ ತಡೆಯುತ್ತೀರಿ?",tip:"SOW documents, change request process, stakeholder management."},
+    {en:"Describe a project that was delayed. How did you recover it?",kn:"ವಿಳಂಬವಾದ ಪ್ರಾಜೆಕ್ಟ್ ವಿವರಿಸಿ. ನೀವು ಅದನ್ನು ಹೇಗೆ ಚೇತರಿಸಿದಿರಿ?",tip:"Root cause, corrective actions, communication to stakeholders."},
+    {en:"How do you manage a team with conflicting priorities?",kn:"ಸಂಘರ್ಷಿತ ಆದ್ಯತೆಗಳಿರುವ ತಂಡವನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Prioritization matrix, clear communication, stakeholder alignment."},
+    {en:"What project management tools do you use daily?",kn:"ನೀವು ದಿನನಿತ್ಯ ಯಾವ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜ್‌ಮೆಂಟ್ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸುತ್ತೀರಿ?",tip:"Jira, Trello, Asana, MS Project, Monday.com, Notion."}
+  ]},
+  {id:'hr_manager', name:'HR Manager', icon:'&#128101;', cat:'Management', color:'var(--pink)', qs:[
+    {en:"Tell us about yourself and your HR experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು HR ಅನುಭವ ಹೇಳಿ.",tip:"Mention areas — recruitment, L&D, payroll, employee relations."},
+    {en:"How do you handle a conflict between two employees?",kn:"ಇಬ್ಬರು ಉದ್ಯೋಗಿಗಳ ನಡುವಿನ ಸಂಘರ್ಷವನ್ನು ನೀವು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Active listening, mediation, policy enforcement, documentation."},
+    {en:"Describe your recruitment process from job posting to offer.",kn:"ಜಾಬ್ ಪೋಸ್ಟಿಂಗ್‌ನಿಂದ ಆಫರ್‌ವರೆಗೆ ನಿಮ್ಮ ನೇಮಕಾತಿ ಪ್ರಕ್ರಿಯೆ ವಿವರಿಸಿ.",tip:"JD writing, sourcing, screening, interviews, background checks, offer."},
+    {en:"How do you measure and improve employee engagement?",kn:"ಉದ್ಯೋಗಿ ತೊಡಗಿಸಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಹೇಗೆ ಅಳೆದು ಸುಧಾರಿಸುತ್ತೀರಿ?",tip:"Surveys, 1-on-1s, recognition programs, exit interviews."},
+    {en:"How do you ensure compliance with labour laws and company policies?",kn:"ಕಾರ್ಮಿಕ ಕಾನೂನುಗಳು ಮತ್ತು ಕಂಪನಿ ನೀತಿಗಳ ಅನುಸರಣೆ ಖಚಿತಪಡಿಸುತ್ತೀರಿ?",tip:"Regular audits, training, policy updates, HR documentation."}
+  ]},
+  // Finance
+  {id:'accountant', name:'Accountant', icon:'&#128181;', cat:'Finance', color:'var(--green)', qs:[
+    {en:"Tell us about yourself and your accounting background.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಅಕೌಂಟಿಂಗ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention qualifications, software used, industries worked in."},
+    {en:"Walk us through your experience with financial statements.",kn:"ಆರ್ಥಿಕ ಹೇಳಿಕೆಗಳ ಅನುಭವ ವಿವರಿಸಿ.",tip:"Balance sheet, P&L, cash flow statement — preparation and analysis."},
+    {en:"How do you ensure accuracy in financial reporting?",kn:"ಆರ್ಥಿಕ ವರದಿಯಲ್ಲಿ ನಿಖರತೆ ಖಚಿತಪಡಿಸಲು ನೀವು ಏನು ಮಾಡುತ್ತೀರಿ?",tip:"Reconciliation, double-entry, audits, internal controls."},
+    {en:"Describe your experience with GST, TDS, and taxation.",kn:"GST, TDS ಮತ್ತು ತೆರಿಗೆಯ ಅನುಭವ ವಿವರಿಸಿ.",tip:"Filing experience, deadlines, compliance, Tally/SAP knowledge."},
+    {en:"What accounting software have you worked with?",kn:"ನೀವು ಯಾವ ಅಕೌಂಟಿಂಗ್ ಸಾಫ್ಟ್‌ವೇರ್ ಬಳಸಿದ್ದೀರಿ?",tip:"Tally, SAP, QuickBooks, Zoho Books, MS Excel, ERP systems."}
+  ]},
+  {id:'finance_analyst', name:'Finance Analyst', icon:'&#128200;', cat:'Finance', color:'var(--cyan)', qs:[
+    {en:"Tell us about yourself and your financial analysis experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಆರ್ಥಿಕ ವಿಶ್ಲೇಷಣೆ ಅನುಭವ ಹೇಳಿ.",tip:"CFA, MBA Finance, industry experience — mention all relevant."},
+    {en:"How do you build and validate a financial model?",kn:"ಆರ್ಥಿಕ ಮಾಡೆಲ್ ಹೇಗೆ ನಿರ್ಮಿಸಿ ಪ್ರಮಾಣೀಕರಿಸುತ್ತೀರಿ?",tip:"DCF, three-statement model, sensitivity analysis, assumptions."},
+    {en:"Explain your experience with budgeting and forecasting.",kn:"ಬಜೆಟಿಂಗ್ ಮತ್ತು ಫೋರ್‌ಕ್ಯಾಸ್ಟಿಂಗ್ ಅನುಭವ ವಿವರಿಸಿ.",tip:"Annual budgets, rolling forecasts, variance analysis, KPIs."},
+    {en:"How do you present financial data to senior management?",kn:"ಹಿರಿಯ ನಿರ್ವಹಣೆಗೆ ಆರ್ಥಿಕ ಡೇಟಾ ಹೇಗೆ ಪ್ರಸ್ತುತಪಡಿಸುತ್ತೀರಿ?",tip:"Executive dashboards, concise summaries, visual charts, key takeaways."},
+    {en:"Tell us about a financial risk you identified and how you mitigated it.",kn:"ನೀವು ಗುರುತಿಸಿದ ಆರ್ಥಿಕ ಅಪಾಯ ಮತ್ತು ಅದನ್ನು ಹೇಗೆ ತಗ್ಗಿಸಿದಿರಿ.",tip:"Risk identification, quantification, mitigation strategy, outcome."}
+  ]},
+  // Operations
+  {id:'operations_manager', name:'Operations Manager', icon:'&#128736;', cat:'Operations', color:'var(--orange)', qs:[
+    {en:"Tell us about yourself and your operations management experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಆಪರೇಷನ್ಸ್ ಮ್ಯಾನೇಜ್‌ಮೆಂಟ್ ಅನುಭವ ಹೇಳಿ.",tip:"Mention team sizes, processes managed, industries."},
+    {en:"How do you improve operational efficiency in a team or process?",kn:"ತಂಡ ಅಥವಾ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ಕಾರ್ಯಾಚರಣೆ ದಕ್ಷತೆ ಹೇಗೆ ಸುಧಾರಿಸುತ್ತೀರಿ?",tip:"Lean, Six Sigma, process mapping, automation, KPIs."},
+    {en:"Describe your experience managing vendors or third-party partners.",kn:"ವೆಂಡರ್‌ಗಳು ಅಥವಾ ಮೂರನೇ ವ್ಯಕ್ತಿ ಪಾಲುದಾರರನ್ನು ನಿರ್ವಹಿಸಿದ ಅನುಭವ ಹೇಳಿ.",tip:"SLAs, contract management, performance reviews, escalations."},
+    {en:"How do you handle a major operational breakdown or crisis?",kn:"ಪ್ರಮುಖ ಕಾರ್ಯಾಚರಣೆ ಸ್ಥಗಿತ ಅಥವಾ ಬಿಕ್ಕಟ್ಟನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Crisis response plan, communication, root cause, preventive steps."},
+    {en:"What metrics do you track to measure operational success?",kn:"ಕಾರ್ಯಾಚರಣೆ ಯಶಸ್ಸನ್ನು ಅಳೆಯಲು ನೀವು ಯಾವ ಮೆಟ್ರಿಕ್‌ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತೀರಿ?",tip:"OEE, throughput, defect rate, cost per unit, SLA compliance."}
+  ]},
+  {id:'supply_chain', name:'Supply Chain Manager', icon:'&#128666;', cat:'Operations', color:'var(--blue)', qs:[
+    {en:"Tell us about yourself and your supply chain experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಸಪ್ಲೈ ಚೈನ್ ಅನುಭವ ಹೇಳಿ.",tip:"Procurement, logistics, inventory, warehouse, distribution."},
+    {en:"How do you manage inventory to avoid stockouts and overstock?",kn:"ಸ್ಟಾಕ್‌ಔಟ್ ಮತ್ತು ಓವರ್‌ಸ್ಟಾಕ್ ತಪ್ಪಿಸಲು ಇನ್ವೆಂಟರಿ ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"EOQ, safety stock, demand forecasting, JIT, ABC analysis."},
+    {en:"Describe your vendor negotiation experience and outcomes.",kn:"ವೆಂಡರ್ ಮಾತುಕತೆಯ ಅನುಭವ ಮತ್ತು ಫಲಿತಾಂಶಗಳನ್ನು ವಿವರಿಸಿ.",tip:"Cost savings achieved, contract terms, relationship management."},
+    {en:"How do you handle supply chain disruptions?",kn:"ಸಪ್ಲೈ ಚೈನ್ ಅಡಚಣೆಗಳನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Backup suppliers, buffer stock, risk assessment, communication."},
+    {en:"What supply chain tools and ERP systems have you used?",kn:"ನೀವು ಯಾವ ಸಪ್ಲೈ ಚೈನ್ ಟೂಲ್‌ಗಳು ಮತ್ತು ERP ಸಿಸ್ಟಮ್‌ಗಳನ್ನು ಬಳಸಿದ್ದೀರಿ?",tip:"SAP, Oracle SCM, Zoho Inventory, Microsoft Dynamics, Fishbowl."}
+  ]},
+  // Sales & Marketing
+  {id:'sales_executive', name:'Sales Executive', icon:'&#129309;', cat:'Sales & Marketing', color:'var(--green)', qs:[
+    {en:"Tell us about yourself and your sales experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಮಾರಾಟ ಅನುಭವ ಹೇಳಿ.",tip:"Mention targets, industries, B2B or B2C, products sold."},
+    {en:"Walk us through your typical sales process from lead to close.",kn:"ಲೀಡ್‌ನಿಂದ ಕ್ಲೋಸ್‌ವರೆಗೆ ನಿಮ್ಮ ಮಾರಾಟ ಪ್ರಕ್ರಿಯೆ ವಿವರಿಸಿ.",tip:"Prospecting, qualifying, pitching, objection handling, closing."},
+    {en:"Tell us about your highest sales achievement. How did you do it?",kn:"ನಿಮ್ಮ ಅತ್ಯುನ್ನತ ಮಾರಾಟ ಸಾಧನೆ ಹೇಳಿ. ಅದನ್ನು ಹೇಗೆ ಮಾಡಿದಿರಿ?",tip:"Be specific — percentage over target, deal size, how you won it."},
+    {en:"How do you handle rejection and stay motivated?",kn:"ತಿರಸ್ಕಾರವನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸಿ ಪ್ರೇರಿತರಾಗಿ ಉಳಿಯುತ್ತೀರಿ?",tip:"Show resilience and a positive mindset with concrete strategies."},
+    {en:"What CRM tools have you used to manage your pipeline?",kn:"ನಿಮ್ಮ ಪೈಪ್‌ಲೈನ್ ನಿರ್ವಹಿಸಲು ನೀವು ಯಾವ CRM ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿದ್ದೀರಿ?",tip:"Salesforce, HubSpot, Zoho CRM, Freshsales — and how you used them."}
+  ]},
+  {id:'digital_marketing', name:'Digital Marketer', icon:'&#128241;', cat:'Sales & Marketing', color:'var(--pink)', qs:[
+    {en:"Tell us about yourself and your digital marketing experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಡಿಜಿಟಲ್ ಮಾರ್ಕೆಟಿಂಗ್ ಅನುಭವ ಹೇಳಿ.",tip:"SEO, SEM, social media, email, content, paid ads — mention all."},
+    {en:"Describe a successful digital campaign you ran. What was the ROI?",kn:"ನೀವು ನಡೆಸಿದ ಯಶಸ್ವಿ ಡಿಜಿಟಲ್ ಕ್ಯಾಂಪೇನ್ ವಿವರಿಸಿ. ROI ಏನಿತ್ತು?",tip:"Give numbers — spend, reach, conversions, cost per lead, ROAS."},
+    {en:"How do you approach SEO for a new website?",kn:"ಹೊಸ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ SEO ಅನ್ನು ಹೇಗೆ ಸಮೀಪಿಸುತ್ತೀರಿ?",tip:"Keyword research, on-page optimization, backlinks, technical SEO."},
+    {en:"How do you measure digital marketing performance?",kn:"ಡಿಜಿಟಲ್ ಮಾರ್ಕೆಟಿಂಗ್ ಕಾರ್ಯಕ್ಷಮತೆ ಹೇಗೆ ಅಳೆಯುತ್ತೀರಿ?",tip:"CTR, CPC, CPL, ROAS, conversion rate, bounce rate, LTV."},
+    {en:"What marketing tools and platforms do you use daily?",kn:"ನೀವು ದಿನನಿತ್ಯ ಯಾವ ಮಾರ್ಕೆಟಿಂಗ್ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸುತ್ತೀರಿ?",tip:"Google Analytics, Meta Ads, HubSpot, Mailchimp, SEMrush, Canva."}
+  ]},
+  // Field / Blue Collar
+  {id:'field_officer', name:'Field Officer', icon:'&#128205;', cat:'Field & Blue Collar', color:'var(--orange)', qs:[
+    {en:"Tell us about yourself — your name, where you are from, and past work.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಹೇಳಿ — ಹೆಸರು, ಎಲ್ಲಿಂದ, ಹಿಂದಿನ ಕೆಲಸ.",tip:"Speak naturally. Be honest about your background and experience."},
+    {en:"What kind of field work have you done before?",kn:"ನೀವು ಮೊದಲು ಯಾವ ರೀತಿಯ ಕ್ಷೇತ್ರ ಕಾರ್ಯ ಮಾಡಿದ್ದೀರಿ?",tip:"Data collection, surveys, delivery, inspection, community work etc."},
+    {en:"How do you manage your work when you have multiple tasks in one day?",kn:"ಒಂದು ದಿನದಲ್ಲಿ ಅನೇಕ ಕೆಲಸಗಳಿದ್ದಾಗ ನೀವು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Prioritization, time management, communication with supervisor."},
+    {en:"Describe a difficult situation you handled in the field.",kn:"ಕ್ಷೇತ್ರದಲ್ಲಿ ನೀವು ನಿರ್ವಹಿಸಿದ ಕಷ್ಟದ ಪರಿಸ್ಥಿತಿ ವಿವರಿಸಿ.",tip:"Show problem-solving — what happened, what you did, the result."},
+    {en:"Are you comfortable traveling to different districts? Do you have a vehicle?",kn:"ನೀವು ವಿವಿಧ ಜಿಲ್ಲೆಗಳಿಗೆ ಪ್ರಯಾಣಿಸಲು ಅನುಕೂಲವಿದ್ದೀರಾ? ವಾಹನ ಇದೆಯೇ?",tip:"Be honest. Mention 2-wheeler, driving license, travel flexibility."}
+  ]},
+  {id:'electrician', name:'Electrician', icon:'&#9889;', cat:'Field & Blue Collar', color:'var(--gold)', qs:[
+    {en:"Tell us about yourself and your electrical work experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ವಿದ್ಯುತ್ ಕೆಲಸದ ಅನುಭವ ಹೇಳಿ.",tip:"ITI, diploma, years of experience, types of work done."},
+    {en:"What types of electrical installations or repairs have you done?",kn:"ನೀವು ಯಾವ ರೀತಿಯ ವಿದ್ಯುತ್ ಸ್ಥಾಪನೆ ಅಥವಾ ದುರಸ್ತಿ ಮಾಡಿದ್ದೀರಿ?",tip:"Domestic, commercial, industrial, wiring, panels, motors, AC/DC."},
+    {en:"How do you ensure safety while working with high voltage equipment?",kn:"ಹೆಚ್ಚಿನ ವೋಲ್ಟೇಜ್ ಉಪಕರಣಗಳೊಂದಿಗೆ ಕೆಲಸ ಮಾಡುವಾಗ ಸುರಕ್ಷತೆ ಖಚಿತಪಡಿಸುತ್ತೀರಿ?",tip:"PPE, lockout-tagout, testing before work, safety protocols."},
+    {en:"Describe a complex electrical fault you diagnosed and fixed.",kn:"ನೀವು ಗುರುತಿಸಿ ಸರಿಪಡಿಸಿದ ಸಂಕೀರ್ಣ ವಿದ್ಯುತ್ ದೋಷ ವಿವರಿಸಿ.",tip:"Show systematic troubleshooting — testing, isolating, fixing."},
+    {en:"Do you have any certifications or ITI qualifications?",kn:"ನಿಮಗೆ ಯಾವುದಾದರೂ ಪ್ರಮಾಣಪತ್ರ ಅಥವಾ ITI ಅರ್ಹತೆ ಇದೆಯೇ?",tip:"Mention all certifications, wireman license, supervisor grade."}
+  ]},
+  {id:'plumber', name:'Plumber', icon:'&#128688;', cat:'Field & Blue Collar', color:'var(--blue)', qs:[
+    {en:"Tell us about yourself and your plumbing experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಪ್ಲಂಬಿಂಗ್ ಅನುಭವ ಹೇಳಿ.",tip:"Years of experience, types of work — domestic, commercial, industrial."},
+    {en:"What types of plumbing work have you handled?",kn:"ನೀವು ಯಾವ ರೀತಿಯ ಪ್ಲಂಬಿಂಗ್ ಕೆಲಸ ಮಾಡಿದ್ದೀರಿ?",tip:"Pipe fitting, drainage, sanitation, water supply, gas lines."},
+    {en:"How do you diagnose a leak or blockage problem?",kn:"ಸೋರಿಕೆ ಅಥವಾ ತಡೆ ಸಮಸ್ಯೆಯನ್ನು ನೀವು ಹೇಗೆ ಗುರುತಿಸುತ್ತೀರಿ?",tip:"Inspection process, tools used, testing methods."},
+    {en:"Describe a challenging plumbing job you completed.",kn:"ನೀವು ಪೂರ್ಣಗೊಳಿಸಿದ ಸವಾಲಿನ ಪ್ಲಂಬಿಂಗ್ ಕೆಲಸ ವಿವರಿಸಿ.",tip:"The problem, approach, tools, time taken, and outcome."},
+    {en:"What tools and materials do you typically use in your work?",kn:"ನಿಮ್ಮ ಕೆಲಸದಲ್ಲಿ ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಯಾವ ಪರಿಕರಗಳನ್ನು ಬಳಸುತ್ತೀರಿ?",tip:"PVC, CPVC, GI pipes, fittings, wrenches, soldering tools."}
+  ]},
+  {id:'driver', name:'Driver', icon:'&#128665;', cat:'Field & Blue Collar', color:'var(--green)', qs:[
+    {en:"Tell us about yourself and your driving experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಡ್ರೈವಿಂಗ್ ಅನುಭವ ಹೇಳಿ.",tip:"Years of driving, vehicle types, license category."},
+    {en:"What types of vehicles have you driven and for how long?",kn:"ನೀವು ಯಾವ ರೀತಿಯ ವಾಹನಗಳನ್ನು ಎಷ್ಟು ಸಮಯ ಓಡಿಸಿದ್ದೀರಿ?",tip:"LMV, HMV, passenger vehicle, goods vehicle, auto, cab."},
+    {en:"How do you ensure passenger or cargo safety on long routes?",kn:"ದೀರ್ಘ ಮಾರ್ಗಗಳಲ್ಲಿ ಪ್ರಯಾಣಿಕ ಅಥವಾ ಸರಕು ಸುರಕ್ಷತೆ ಖಚಿತಪಡಿಸುತ್ತೀರಿ?",tip:"Pre-trip checks, speed limits, rest breaks, emergency protocols."},
+    {en:"Have you had any accidents or traffic violations? How did you handle it?",kn:"ನಿಮಗೆ ಯಾವುದಾದರೂ ಅಪಘಾತ ಅಥವಾ ಸಂಚಾರ ಉಲ್ಲಂಘನೆ ಆಗಿದೆಯೇ?",tip:"Be honest. Show responsibility and what you learned."},
+    {en:"Are you familiar with routes in Karnataka? Do you use GPS?",kn:"ಕರ್ನಾಟಕದ ಮಾರ್ಗಗಳೊಂದಿಗೆ ನಿಮಗೆ ಪರಿಚಯ ಇದೆಯೇ? GPS ಬಳಸುತ್ತೀರಾ?",tip:"Mention districts you know, navigation apps you use."}
+  ]},
+  // Healthcare
+  {id:'nurse', name:'Nurse / Healthcare Worker', icon:'&#129657;', cat:'Healthcare', color:'var(--pink)', qs:[
+    {en:"Tell us about yourself and your healthcare experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಆರೋಗ್ಯ ರಕ್ಷಣೆ ಅನุಭವ ಹೇಳಿ.",tip:"GNM, B.Sc Nursing, ANM — qualifications and experience."},
+    {en:"Describe your daily responsibilities in your current or past role.",kn:"ನಿಮ್ಮ ದೈನಂದಿನ ಜವಾಬ್ದಾರಿಗಳನ್ನು ವಿವರಿಸಿ.",tip:"Patient care, vitals, medication, documentation, doctor assistance."},
+    {en:"How do you handle a patient in emergency or critical condition?",kn:"ತುರ್ತು ಅಥವಾ ಗಂಭೀರ ಸ್ಥಿತಿಯಲ್ಲಿ ರೋಗಿಯನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Triage, first aid, notifying doctor, documentation, calm approach."},
+    {en:"How do you ensure patient dignity and comfort during care?",kn:"ಆರೈಕೆಯ ಸಮಯದಲ್ಲಿ ರೋಗಿಯ ಘನತೆ ಮತ್ತು ಸೌಕರ್ಯ ಖಚಿತಪಡಿಸುತ್ತೀರಿ?",tip:"Empathy, privacy, communication, cultural sensitivity."},
+    {en:"Tell us about a challenging patient case and how you managed it.",kn:"ಒಂದು ಸವಾಲಿನ ರೋಗಿಯ ಪ್ರಕರಣ ಮತ್ತು ಅದನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸಿದಿರಿ.",tip:"Situation, your actions, outcome, what you learned."}
+  ]},
+  // Education
+  {id:'teacher', name:'Teacher / Educator', icon:'&#128218;', cat:'Education', color:'var(--blue)', qs:[
+    {en:"Tell us about yourself and your teaching experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಬೋಧನಾ ಅನುಭವ ಹೇಳಿ.",tip:"Subjects taught, age groups, school type, years of experience."},
+    {en:"How do you make a difficult concept easy for students to understand?",kn:"ಕಷ್ಟದ ಪರಿಕಲ್ಪನೆಯನ್ನು ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ ಸರಳಗೊಳಿಸಲು ಹೇಗೆ ಮಾಡುತ್ತೀರಿ?",tip:"Analogies, visual aids, activities, real-life examples, repetition."},
+    {en:"How do you handle students with different learning abilities in one class?",kn:"ಒಂದೇ ತರಗತಿಯಲ್ಲಿ ವಿಭಿನ್ನ ಕಲಿಕಾ ಸಾಮರ್ಥ್ಯದ ವಿದ್ಯಾರ್ಥಿಗಳನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Differentiated instruction, group work, peer learning, extra support."},
+    {en:"Describe your approach to classroom management.",kn:"ತರಗತಿ ನಿರ್ವಹಣೆಯ ನಿಮ್ಮ ವಿಧಾನ ವಿವರಿಸಿ.",tip:"Routines, positive reinforcement, engagement, clear expectations."},
+    {en:"How do you use technology in your teaching?",kn:"ಬೋಧನೆಯಲ್ಲಿ ತಂತ್ರಜ್ಞಾನ ಹೇಗೆ ಬಳಸುತ್ತೀರಿ?",tip:"Smart boards, educational apps, videos, online resources, Kahoot."}
+  ]},
+  // Customer Service
+  {id:'customer_service', name:'Customer Service Executive', icon:'&#127911;', cat:'Customer Service', color:'var(--cyan)', qs:[
+    {en:"Tell us about yourself and your customer service experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ಗ್ರಾಹಕ ಸೇವಾ ಅನುಭವ ಹೇಳಿ.",tip:"Channel experience — phone, email, chat, in-person."},
+    {en:"How do you handle an angry or frustrated customer?",kn:"ಕೋಪಗೊಂಡ ಅಥವಾ ಹತಾಶ ಗ್ರಾಹಕರನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Active listening, empathy, apology, solution, follow-up."},
+    {en:"Describe a time you went beyond your job to help a customer.",kn:"ಗ್ರಾಹಕರಿಗೆ ಸಹಾಯ ಮಾಡಲು ನೀವು ಕೆಲಸದ ಆಚೆ ಹೋದ ಸಂದರ್ಭ ವಿವರಿಸಿ.",tip:"Show initiative and genuine care for customer satisfaction."},
+    {en:"How do you prioritize multiple customer queries at once?",kn:"ಒಂದೇ ಬಾರಿ ಅನೇಕ ಗ್ರಾಹಕ ಪ್ರಶ್ನೆಗಳಿಗೆ ಹೇಗೆ ಆದ್ಯತೆ ನೀಡುತ್ತೀರಿ?",tip:"Urgency, impact, queue management, escalation protocols."},
+    {en:"What tools have you used for customer support?",kn:"ಗ್ರಾಹಕ ಬೆಂಬಲಕ್ಕಾಗಿ ನೀವು ಯಾವ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿದ್ದೀರಿ?",tip:"Zendesk, Freshdesk, Salesforce, CRM, ticketing systems."}
+  ]},
+  {id:'receptionist', name:'Receptionist', icon:'&#128222;', cat:'Customer Service', color:'var(--purple)', qs:[
+    {en:"Tell us about yourself and your front-desk or receptionist experience.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಮತ್ತು ರಿಸೆಪ್ಷನಿಸ್ಟ್ ಅನುಭವ ಹೇಳಿ.",tip:"Office type, visitor management, phone handling experience."},
+    {en:"How do you manage multiple visitors and calls at the same time?",kn:"ಒಂದೇ ಬಾರಿ ಅನೇಕ ಸಂದರ್ಶಕರು ಮತ್ತು ಕರೆಗಳನ್ನು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Prioritization, polite communication, log-keeping."},
+    {en:"How do you handle a difficult or rude visitor professionally?",kn:"ಕಷ್ಟಕರ ಅಥವಾ ಅಸಭ್ಯ ಸಂದರ್ಶಕರನ್ನು ವೃತ್ತಿಪರವಾಗಿ ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತೀರಿ?",tip:"Stay calm, be firm but polite, escalate if needed."},
+    {en:"What software or office tools are you comfortable using?",kn:"ನೀವು ಯಾವ ಸಾಫ್ಟ್‌ವೇರ್ ಅಥವಾ ಕಚೇರಿ ಪರಿಕರಗಳನ್ನು ಆರಾಮದಾಯಕವಾಗಿ ಬಳಸಬಲ್ಲಿರಿ?",tip:"MS Office, email, scheduling software, visitor management systems."},
+    {en:"How important is appearance and punctuality in your role?",kn:"ನಿಮ್ಮ ಪಾತ್ರದಲ್ಲಿ ನೋಟ ಮತ್ತು ಸಮಯಪಾಲನೆ ಎಷ್ಟು ಮಹತ್ವದ್ದು?",tip:"First impressions matter — show professionalism and punctuality."}
+  ]}
+];
+
+var activeCat = 'All';
+var cats = ['All','Technology','Management','Finance','Operations','Sales & Marketing','Field & Blue Collar','Healthcare','Education','Customer Service'];
+
+function goJobRole(){
+  document.getElementById('mainNav').style.display='none';
+  document.getElementById('pageFooter').style.display='none';
+  showAll('s-job-role');
+  buildCatTabs();
+  buildJobGrid(jobRoles);
+}
+
+function buildCatTabs(){
+  var el=document.getElementById('catTabs');
+  el.innerHTML='';
+  cats.forEach(function(cat){
+    var btn=document.createElement('button');
+    btn.textContent=cat;
+    btn.style.cssText='padding:6px 14px;border-radius:50px;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.18s;font-family:DM Sans,sans-serif;border:1px solid;'
+      +(cat===activeCat?'background:var(--cyan);color:#0A1628;border-color:var(--cyan);':'background:transparent;color:rgba(255,255,255,0.45);border-color:rgba(255,255,255,0.15);');
+    btn.onclick=function(){activeCat=cat;buildCatTabs();var filtered=cat==='All'?jobRoles:jobRoles.filter(function(r){return r.cat===cat});buildJobGrid(filtered);};
+    el.appendChild(btn);
+  });
+}
+
+function buildJobGrid(roles){
+  var grid=document.getElementById('jobRoleGrid');
+  grid.innerHTML='';
+  roles.forEach(function(role){
+    var card=document.createElement('div');
+    var isSelected=selectedJobRole&&selectedJobRole.id===role.id;
+    card.style.cssText='background:rgba(255,255,255,0.04);border:1.5px solid '+(isSelected?role.color:'rgba(255,255,255,0.1)')+';border-radius:12px;padding:14px 12px;cursor:pointer;transition:all 0.18s;text-align:center;'+(isSelected?'background:rgba(255,255,255,0.08);':'');
+    card.innerHTML='<div style="font-size:22px;margin-bottom:8px">'+role.icon+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:'+(isSelected?role.color:'rgba(255,255,255,0.8)')+';margin-bottom:3px">'+role.name+'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,0.3)">'+role.qs.length+' questions</div>';
+    card.onclick=function(){selectedJobRole=role;buildJobGrid(roles);showSelectedRole(role);};
+    card.onmouseover=function(){if(!isSelected)this.style.background='rgba(255,255,255,0.07)';};
+    card.onmouseout=function(){if(!isSelected)this.style.background='rgba(255,255,255,0.04)';};
+    grid.appendChild(card);
+  });
+}
+
+function showSelectedRole(role){
+  var info=document.getElementById('selectedRoleInfo');
+  info.style.display='flex';
+  document.getElementById('selectedRoleName').textContent=role.icon+' '+role.name;
+  document.getElementById('selectedRoleQCount').textContent=role.qs.length+' customised questions — ready to begin';
+  document.getElementById('jobRoleErr').style.display='none';
+}
+
+function filterJobRoles(val){
+  var filtered=jobRoles.filter(function(r){return r.name.toLowerCase().includes(val.toLowerCase())||(activeCat!=='All'&&r.cat===activeCat);});
+  if(!val) filtered=activeCat==='All'?jobRoles:jobRoles.filter(function(r){return r.cat===activeCat;});
+  buildJobGrid(filtered);
+}
+
+function startInterview(){
+  if(!selectedJobRole){document.getElementById('jobRoleErr').style.display='block';return;}
+  ivQuestions=selectedJobRole.qs;
+  ivCurrent=0;
+  ivDone=new Array(ivQuestions.length).fill(false);
+  document.getElementById('mainNav').style.display='flex';
+  document.getElementById('pageFooter').style.display='block';
+  showMod('interview');
+  renderIvQ();
+}
+
+var isRecording=false;var recInterval=null;var recSecs=0;
+var selectedCRole='Blue-Collar Worker';
+
+function showAll(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);if(el)el.classList.add('active');window.scrollTo(0,0);
+}
+function goRole(){
+  document.getElementById('mainNav').style.display='none';
+  document.getElementById('pageFooter').style.display='none';
+  showAll('s-role');
+}
+function goLogin(r){showAll('s-'+r)}
+var CRED_ADMIN={email:"admin@karnataka.gov.in",pass:"Admin@2024"};
+var CRED_HR={email:"hr@infosys.com",pass:"HR@2024",company:"Infosys BPM"};
+
+function showErr(id,msg){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.style.display='block';
+  el.textContent=msg;
+  setTimeout(function(){el.style.display='none'},4000);
+}
+function shakeBtn(btn){
+  btn.style.animation='shake 0.4s ease';
+  setTimeout(function(){btn.style.animation=''},500);
+}
+
+function loginCandidate(){
+  var mobile=document.getElementById('candMobile').value.trim();
+  var aadhaar=document.getElementById('candAadhaar').value.trim();
+  var mobileClean=mobile.replace(/[\s\-\+]/g,'');
+  if(!mobile){showErr('candErr','\u26a0 Please enter your mobile number.');return;}
+  if(!/^[0-9]{10,13}$/.test(mobileClean)){showErr('candErr','\u26a0 Please enter a valid 10-digit mobile number.');return;}
+  if(!aadhaar){showErr('candErr','\u26a0 Please enter the last 4 digits of your Aadhaar.');return;}
+  if(!/^[0-9]{4}$/.test(aadhaar)){showErr('candErr','\u26a0 Aadhaar must be exactly 4 digits (numbers only).');return;}
+  document.getElementById('candRoleTag').textContent=selectedCRole;
+  showAll('s-dash-candidate');
+  showT('Welcome! Identity verified \u2713','var(--green)');
+}
+
+function loginAdmin(){
+  var email=document.getElementById('adminEmail').value.trim();
+  var pass=document.getElementById('adminPass').value;
+  if(!email){showErr('adminErr','\u26a0 Please enter your official email address.');return;}
+  if(!email.endsWith('@karnataka.gov.in')){showErr('adminErr','\u26a0 Only Karnataka government email IDs are allowed (must end with @karnataka.gov.in).');return;}
+  if(!pass){showErr('adminErr','\u26a0 Please enter your password.');return;}
+  if(pass.length<6){showErr('adminErr','\u26a0 Password must be at least 6 characters.');return;}
+  if(email!==CRED_ADMIN.email||pass!==CRED_ADMIN.pass){showErr('adminErr','\u26a0 Invalid email or password. Use admin@karnataka.gov.in / Admin@2024');return;}
+  showAll('s-dash-admin');
+  showT('Admin access granted \u2713','var(--gold)');
+}
+
+function loginHR(){
+  var email=document.getElementById('hrEmail').value.trim();
+  var pass=document.getElementById('hrPass').value;
+  var company=document.getElementById('hrCompany').value.trim();
+  if(!email){showErr('hrErr','\u26a0 Please enter your work email address.');return;}
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showErr('hrErr','\u26a0 Please enter a valid email address.');return;}
+  if(!pass){showErr('hrErr','\u26a0 Please enter your password.');return;}
+  if(pass.length<6){showErr('hrErr','\u26a0 Password must be at least 6 characters.');return;}
+  if(!company){showErr('hrErr','\u26a0 Please enter your company name.');return;}
+  if(email!==CRED_HR.email||pass!==CRED_HR.pass){showErr('hrErr','\u26a0 Invalid credentials. Use hr@infosys.com / HR@2024');return;}
+  showAll('s-dash-hr');
+  showT('Recruiter access granted \u2713','var(--green)');
+}
+
+function loginOTP(){
+  var email=document.getElementById('hrEmail').value.trim();
+  if(!email||!/^[^@]+@[^@]+\.[^@]+$/.test(email)){showErr('hrErr','\u26a0 Please enter a valid email to receive OTP.');return;}
+  showT('OTP sent to '+email,'var(--cyan)');
+}
+
+function goCandDash(){loginCandidate();}
+function goAdminDash(){loginAdmin();}
+function goHRDash(){loginHR();}
+function goFullProto(){
+  document.getElementById('mainNav').style.display='flex';
+  document.getElementById('pageFooter').style.display='block';
+  showAll('mod-home');
+  document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.ntab')[0].classList.add('active');
+}
+function showMod(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('mod-'+id).classList.add('active');
+  var map={home:0,interview:1,assessment:2,validation:3,integrity:4,classification:5,dashboard:6};
+  document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active')});
+  if(map[id]!==undefined) document.querySelectorAll('.ntab')[map[id]].classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='assessment') initAssessment();
+  if(id==='validation') initAudioWave();
+  if(id==='classification') initFunnel();
+  if(id==='dashboard') renderTable(candidates);
+  if(id==='interview'){initWave();initIvQ();}
+initIvQ();
+}
+function selectCRole(el,role){
+  document.querySelectorAll('.crole-card').forEach(function(c){c.classList.remove('selected')});
+  el.classList.add('selected');selectedCRole=role;
+}
+function setLP(el){
+  var p=el.closest('.lrow')||el.parentElement;
+  p.querySelectorAll('.lpill').forEach(function(x){x.classList.remove('active')});
+  el.classList.add('active');showT('Language: '+el.textContent.trim(),'var(--cyan)');
+}
+function setVTab(el,panel){
+  document.querySelectorAll('.utab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  ['record','upload','whatsapp'].forEach(function(p){
+    var el2=document.getElementById('vpanel-'+p);if(el2) el2.style.display='none';
+  });
+  var show=document.getElementById('vpanel-'+panel);if(show) show.style.display='block';
+}
+function toggleRec(){
+  isRecording=!isRecording;
+  var btn=document.getElementById('recBtn');
+  var display=document.getElementById('recTimerDisplay');
+  var zone=document.getElementById('videoFrame');
+  if(isRecording){
+    btn.textContent='⏹ Stop Recording';btn.style.background='var(--orange)';
+    display.style.display='block';recSecs=0;
+    recInterval=setInterval(function(){
+      recSecs++;
+      var m=Math.floor(recSecs/60);var s=recSecs%60;
+      display.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+      document.getElementById('timerLabel').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    },1000);
+    showT('Recording started','var(--red)');
+  } else {
+    clearInterval(recInterval);
+    btn.textContent='&#9679; Start Recording';btn.style.background='var(--red)';
+    display.style.display='none';
+    showT('Recording saved — '+Math.floor(recSecs/60)+'m '+recSecs%60+'s','var(--green)');
+  }
+}
+function triggerUpload(){document.getElementById('vidFileInput').click()}
+function handleVidFile(input){
+  if(input.files&&input.files[0]){
+    var f=input.files[0];
+    document.getElementById('uploadIcon').textContent='✅';
+    document.getElementById('uploadTitle').textContent=f.name;
+    document.getElementById('uploadSub').textContent='Video ready — '+Math.round(f.size/1024/1024*10)/10+' MB';
+    document.getElementById('uploadZone').classList.add('has-file');
+    var btn=document.getElementById('uploadAnalyzeBtn');btn.disabled=false;btn.style.opacity='1';
+    showT('Video uploaded: '+f.name,'var(--green)');
+  }
+}
+function initWave(){
+  var c=document.getElementById('waveViz');if(!c)return;c.innerHTML='';
+  for(var i=0;i<26;i++){var b=document.createElement('div');b.className='wbar';b.style.animationDelay=(i*0.08)+'s';b.style.height=(4+Math.random()*18)+'px';c.appendChild(b);}
+}
+function initAudioWave(){
+  var c=document.getElementById('audioWave');if(!c)return;c.innerHTML='';
+  for(var i=0;i<38;i++){var b=document.createElement('div');b.className='awbar';b.style.height=(4+Math.random()*36)+'px';b.style.width='4px';b.style.borderRadius='2px';b.style.background='var(--cyan)';b.style.opacity=(0.3+Math.random()*0.7).toFixed(2);c.appendChild(b);}
+}
+function initAssessment(){
+  var g=document.getElementById('assessGrid');if(!g)return;g.innerHTML='';
+  dims.forEach(function(d,i){
+    var card=document.createElement('div');card.className='acard';
+    card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:12px;color:rgba(255,255,255,0.7)">'+d.name+'</div><div style="font-family:Syne,sans-serif;font-size:15px;font-weight:700;color:'+d.color+'">'+d.score+'</div></div><div class="bartrack"><div class="barfill" id="ab'+i+'" style="width:0%;background:'+d.color+'"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.28);line-height:1.5">'+d.note+'</div>';
+    g.appendChild(card);
+    setTimeout(function(idx){return function(){var el=document.getElementById('ab'+idx);if(el)el.style.width=dims[idx].score+'%'}}(i),150+i*90);
+  });
+  var s=document.getElementById('scoreCount');if(!s)return;var count=0;
+  var iv=setInterval(function(){count=Math.min(count+2,82);s.textContent=count;if(count>=82)clearInterval(iv)},25);
+}
+function initFunnel(){
+  var el=document.getElementById('funnelEl');if(!el)return;el.innerHTML='';
+  funnel.forEach(function(f,i){
+    var row=document.createElement('div');row.className='frow2';
+    row.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,0.45);min-width:120px">'+f.label+'</div><div class="fbar-wrap"><div class="fbar" id="fb'+i+'" style="width:0%;background:'+f.color+';color:#fff">'+f.count+' candidates</div></div>';
+    el.appendChild(row);
+    setTimeout(function(idx){return function(){var b=document.getElementById('fb'+idx);if(b)b.style.width=funnel[idx].pct+'%'}}(i),200+i*120);
+  });
+}
+function renderTable(list){
+  var b=document.getElementById('tableBody');if(!b)return;b.innerHTML='';
+  list.forEach(function(c){
+    var row=document.createElement('div');row.className='trow';
+    var sc=c.score>=75?'var(--green)':c.score>=55?'var(--gold)':'var(--red)';
+    row.innerHTML='<div><div style="font-weight:500;font-size:12px">'+c.name+'</div><div style="font-size:10px;color:rgba(255,255,255,0.32);margin-top:1px">'+c.lang+'</div></div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,0.45)">'+c.loc+'</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,0.45)">'+c.lang+'</div>'
+      +'<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:'+sc+'">'+c.score+'</div>'
+      +'<div><span style="font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.05);color:'+c.cc+'">'+c.cat+'</span></div>'
+      +'<div style="display:flex;gap:5px">'
+      +'<button class="bsm bg" style="padding:5px 10px;font-size:10px" onclick="showT(\'Shortlisted\',\'var(--green)\')">Shortlist</button>'
+      +'<button class="bsm bgold" style="padding:5px 10px;font-size:10px" onclick="showT(\'Flagged\',\'var(--gold)\')">Flag</button>'
+      +'</div>';
+    b.appendChild(row);
+  });
+}
+function filterTable(val,type){
+  if(!val||val.startsWith('All')){renderTable(candidates);return}
+  renderTable(candidates.filter(function(c){
+    if(type==='district') return c.loc===val;
+    if(type==='lang') return c.lang===val;
+    if(type==='cat') return c.cat.toLowerCase().includes(val.toLowerCase());
+    return true;
+  }));
+}
+
+var ivQuestions=[
+  {en:"Tell us about yourself — your name, where you are from, and what kind of work you have done before.",kn:"ನಿಮ್ಮ ಬಗ್ಗೆ ಹೇಳಿ — ನಿಮ್ಮ ಹೆಸರು, ನೀವು ಎಲ್ಲಿಂದ ಬಂದಿದ್ದೀರಿ ಮತ್ತು ಮೊದಲು ಏನು ಕೆಲಸ ಮಾಡಿದ್ದೀರಿ.",tip:"Speak naturally. There are no right or wrong answers. Just share your background honestly.",kn_short:"ನಿಮ್ಮ ಬಗ್ಗೆ ಹೇಳಿ."},
+  {en:"Describe your previous work experience and your key responsibilities.",kn:"ನಿಮ್ಮ ಹಿಂದಿನ ಕೆಲಸದ ಅನುಭವ ಮತ್ತು ಮುಖ್ಯ ಜವಾಬ್ದಾರಿಗಳನ್ನು ವಿವರಿಸಿ.",tip:"Mention specific tasks you did daily — supervising workers, operating machines, customer handling.",kn_short:"ಕೆಲಸದ ಅನುಭವ ವಿವರಿಸಿ."},
+  {en:"What are your strongest skills? Give an example of how you have used them at work or in daily life.",kn:"ನಿಮ್ಮ ಪ್ರಮುಖ ಕೌಶಲ್ಯಗಳು ಯಾವುವು? ನೀವು ಅವುಗಳನ್ನು ಹೇಗೆ ಬಳಸಿದ್ದೀರಿ ಎಂಬ ಉದಾಹರಣೆ ಕೊಡಿ.",tip:"Think about teamwork, problem solving, physical skills, communication or technical skills.",kn_short:"ನಿಮ್ಮ ಕೌಶಲ್ಯಗಳು ಯಾವುವು?"},
+  {en:"Tell us about a difficult situation you faced at work or at home and how you handled it.",kn:"ಕೆಲಸದಲ್ಲಿ ಅಥವಾ ಮನೆಯಲ್ಲಿ ನೀವು ಎದುರಿಸಿದ ಕಷ್ಟದ ಪರಿಸ್ಥಿತಿ ಮತ್ತು ನೀವು ಅದನ್ನು ಹೇಗೆ ನಿಭಾಯಿಸಿದಿರಿ ಎಂಬುದನ್ನು ಹೇಳಿ.",tip:"Describe the situation, what you did, and the result. This shows your problem-solving ability.",kn_short:"ಕಷ್ಟದ ಪರಿಸ್ಥಿತಿ ಬಗ್ಗೆ ಹೇಳಿ."},
+  {en:"Why are you looking for a new job and what kind of role are you hoping to get?",kn:"ನೀವು ಏಕೆ ಹೊಸ ಕೆಲಸ ಹುಡುಕುತ್ತಿದ್ದೀರಿ ಮತ್ತು ಯಾವ ರೀತಿಯ ಪಾತ್ರ ಬಯಸುತ್ತಿದ್ದೀರಿ?",tip:"Be honest about your goals. Mention the type of work you enjoy and your target role.",kn_short:"ಹೊಸ ಕೆಲಸ ಏಕೆ ಹುಡುಕುತ್ತಿದ್ದೀರಿ?"}
+];
+var ivCurrent=0;
+var ivDone=new Array(5).fill(false);
+
+var ivTranscripts=[
+  {kn:'"ನನ್ನ ಹೆಸರು ಪ್ರಿಯಾ. ನಾನು ಧಾರವಾಡದಿಂದ ಬಂದಿದ್ದೇನೆ..."',en:'"My name is Priya. I am from Dharwad..."'},
+  {kn:'"ನಾನು ಡೇಟಾ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ ಎರಡು ವರ್ಷ ಕೆಲಸ ಮಾಡಿದ್ದೇನೆ..."',en:'"I have worked in data analysis for two years..."'},
+  {kn:'"ನನ್ನ ಪ್ರಮುಖ ಕೌಶಲ್ಯ ಟೀಮ್ ನಿರ್ವಹಣೆ ಮತ್ತು ಸಂವಹನ..."',en:'"My key skills are team management and communication..."'},
+  {kn:'"ಒಮ್ಮೆ ನಮ್ಮ ಪ್ರಾಜೆಕ್ಟ್ ಡೆಡ್ಲೈನ್ ತಪ್ಪಿಹೋಗುತ್ತಿತ್ತು, ನಾನು..."',en:'"Once our project deadline was at risk, I stepped in and..."'},
+  {kn:'"ನಾನು ಹೊಸ ಅವಕಾಶ ಹುಡುಕುತ್ತಿದ್ದೇನೆ ಏಕೆಂದರೆ..."',en:'"I am looking for new opportunities because..."'}
+];
+
+function renderIvQ(){
+  var q=ivQuestions[ivCurrent];
+  var el_counter=document.getElementById('qCounter');
+  var el_en=document.getElementById('qEnText');
+  var el_kn=document.getElementById('qKnText');
+  var el_tip=document.getElementById('qTipBox');
+  var el_prog=document.getElementById('qProgBar');
+  var el_next=document.getElementById('qNextBtn');
+  var el_trans_kn=document.getElementById('transcriptKn');
+  var el_trans_en=document.getElementById('transcriptEn');
+  if(!el_counter) return;
+  el_counter.textContent='\u{1F3AF} Question '+(ivCurrent+1)+' of 5';
+  el_en.textContent=q.en;
+  el_kn.textContent=q.kn;
+  el_tip.innerHTML='<strong style="color:rgba(255,255,255,0.65)">Tip:</strong> '+q.tip;
+  el_prog.style.width=((ivCurrent+1)/5*100)+'%';
+  if(el_trans_kn) el_trans_kn.textContent=ivTranscripts[ivCurrent].kn;
+  if(el_trans_en) el_trans_en.textContent=ivTranscripts[ivCurrent].en;
+  if(el_next) el_next.textContent=ivCurrent===4?'Finish \u2713':'Next Q \u2192';
+  buildIvNav();
+}
+
+function buildIvNav(){
+  var row=document.getElementById('qNavPills');
+  if(!row) return;
+  row.innerHTML='';
+  ivQuestions.forEach(function(q,i){
+    var btn=document.createElement('button');
+    var isActive=i===ivCurrent;
+    var isDone=ivDone[i];
+    btn.textContent='Q'+(i+1);
+    btn.style.cssText='padding:4px 12px;border-radius:50px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid;transition:all 0.18s;font-family:DM Sans,sans-serif;'
+      +(isActive?'background:var(--cyan);color:#0A1628;border-color:var(--cyan);'
+      :isDone?'background:rgba(16,185,129,0.15);color:var(--green);border-color:rgba(16,185,129,0.4);'
+      :'background:transparent;color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.15);');
+    btn.onclick=function(){ivCurrent=i;renderIvQ()};
+    row.appendChild(btn);
+  });
+}
+
+function nextIvQ(){
+  ivDone[ivCurrent]=true;
+  if(ivCurrent<4){
+    ivCurrent++;
+    renderIvQ();
+    showT('Question '+(ivCurrent)+' saved!','var(--green)');
+  } else {
+    ivDone[ivCurrent]=true;
+    buildIvNav();
+    var panel=document.getElementById('ivDoneBanner');
+    if(panel){panel.style.display='block';}
+    showT('All 5 questions done!','var(--green)');
+  }
+}
+
+function skipIvQ(){
+  if(ivCurrent<4){ivCurrent++;renderIvQ();showT('Question skipped','var(--gold)');}
+}
+
+function initIvQ(){ivCurrent=0;ivDone=new Array(5).fill(false);renderIvQ();}
+
+function showT(msg,color){
+  var el=document.createElement('div');el.className='toast';el.textContent=msg;
+  el.style.background=color||'var(--green)';
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.remove()},2200);
+}
+initWave();
+</script>
+</body>
+</html>
